@@ -36,6 +36,7 @@ function createLoginPage(){
             .then(response => {
                     $("body").empty();
                     $("body").removeClass("login")
+                    createHeader();
 
                 })
             .catch(error => {
@@ -79,7 +80,16 @@ function createRegisterPage(){
 
 }
 
+function createHeader(){
+    let nav = $('<nav>').addClass('navbar header');
+    let container = $('<div>').addClass('container-fluid');
+    let brandLink = $('<a>').addClass('navbar-brand header').text('Rizzler').attr('href', '/').css('margin-left', '20px');
 
+    container.append(brandLink);
+    nav.append(container);
+
+    $('body').prepend(nav);
+}
 
 $(document).ready(function() {
     createLoginPage();

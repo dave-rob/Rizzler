@@ -17,7 +17,6 @@ app.use(express.urlencoded({ extended:true}));
 app.use(express.json());
 
 app.post('/register', async (req, res)=>{
-    console.log(req.body);
     try{
         let body = req.body;
         for(let val in body){

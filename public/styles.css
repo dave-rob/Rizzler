@@ -89,3 +89,13 @@ button.register{
     align-self: flex-end;
     margin-top: 1em;
 }
+
+
+nav.header{
+    background-image: url('pictures/login-background.jpg');
+}
+
+a.header{
+    color: #808080;
+    font-family: 'Nanum Gothic', sans-serif;
+}
