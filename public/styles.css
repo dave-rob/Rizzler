@@ -123,3 +123,13 @@ a.header{
     width:25%;
     height: 100%;
 }
+
+.edit{
+    float:right;
+}
+
+.info-form{
+    display: flex;
+    flex-direction: column;
+    padding: 1em;
+}

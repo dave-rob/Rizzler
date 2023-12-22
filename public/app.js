@@ -108,12 +108,8 @@ function createHeader(){
     $('body').prepend(nav);
 }
 
-async function createLeftColumn(){
-    let div1 = $('<div>').css('background-color','yellow').addClass('left');
-    let info = $('<div>').css('border', '1px solid red')
-    div1.append(info);
-    await axios.get('/user')
-            .then((response) => {
+function editBio(info, response){
+    let editButton = $('<button>').addClass('edit').text('edit')
                     const {f_name, l_name, bio, interest, personality, pic} = response.data[0];
                     console.log(response);
                     let image = $('<img>').attr('src', pic).attr('height', '100px').attr('width', '100px');
@@ -121,7 +117,54 @@ async function createLeftColumn(){
                     let characteristics = $('<em>').text(personality);
                     let pbio= $('<p>').text(bio);
                     let interestedIn = $('<p>').text(`Interested in: ${interest}`);
-                    info.append(image, name, characteristics, pbio, interestedIn);
+                    info.append(editButton, image, name, characteristics, pbio, interestedIn);
+
+                    editButton.on('click', function(){
+                        info.empty();
+                        let saveButton = $('<button>').addClass('edit').text('Save')
+                        let image = $('<img>').attr('src', pic).attr('height', '100px').attr('width', '100px');
+                        let name2 = $('<h3>').text(f_name + ' ' + l_name);
+                        let form = $('<form>').addClass("info-form");
+                        let traitsLabel = $('<label>').text("Personality Traits:");
+                        let characteristics2 = $('<input>').attr("name", "personality").attr("value", personality);
+                        let bioLabel = $('<label>').text("Bio:");
+                        let newBio = $('<textarea>').attr({"name":"bio", "rows":"3"}).text(bio);
+                        let interestsLabel = $('<label>').text("Interested in:");
+                        let newInterest = $('<select>').attr("name", "gender");
+                        let option1 = $('<option>').attr("value", "Men").text("Men");
+                        let option2 = $('<option>').attr("value", "Women").text("Women");
+                        if(interest==='Men'){
+                                option1.prop("selected", "selected");
+                        } else{
+                            option2.prop("selected","selected");
+                        }
+                        newInterest.append(option1,option2);
+                        info.append(saveButton,image, name2, form.append(traitsLabel,characteristics2,bioLabel, newBio,interestsLabel, newInterest))
+
+                        saveButton.on('click', function(){
+                            axios.patch("/user",{
+                                "personality": characteristics2.val(),
+                                bio: newBio.val(),
+                                interest: newInterest.val()
+                            })
+                                .then(response => {
+                                    console.log("response")
+                                    info.empty();
+                                    editBio(info, response);
+                                    })
+                            // info.empty()
+                            // editBio(info, response);
+                        })
+                    })
+}
+
+async function createLeftColumn(container){
+    let div1 = $('<div>').css('background-color','yellow').addClass('left');
+    let info = $('<div>').css('border', '1px solid red')
+    div1.append(info);
+    await axios.get('/user')
+            .then((response) => {
+                    editBio(info, response)
                     
                 })
             .catch(error => {
@@ -135,7 +178,7 @@ async function createLeftColumn(){
 async function createHomePage(){
     createHeader();
     let container = $('<container>').addClass('home')
-    let div1 = await createLeftColumn();
+    let div1 = await createLeftColumn(container);
     let div2 = $('<div>').css('background-color','red').text("div").addClass('center');
     let div3 = $('<div>').css('background-color','blue').text("div").addClass('right');
     container.append(div1, div2, div3)
@@ -143,7 +186,7 @@ async function createHomePage(){
 }
 
 $(document).ready(function() {
-    createLoginPage();
-    // $("body").removeClass("login")
-    // createHomePage()
+    //createLoginPage();
+    $("body").removeClass("login")
+    createHomePage()
 })

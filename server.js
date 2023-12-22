@@ -9,7 +9,7 @@ const connectionString= process.env.DATABASE_URL;
 const db = new pg.Pool({
     connectionString
 })
-let id = 0;
+let id = 1;
 app.use(express.static('public')) 
 
 //lets you get req.body from forms and parse URL-encoded data
@@ -31,9 +31,9 @@ app.post('/register', async (req, res)=>{
         const { rows } = await db.query("SELECT id from users WHERE username = $1;", [username]);
         let user_id= rows[0].id
         if(gender === 'male'){
-            await db.query("INSERT INTO info (user_id, gender, interest) VALUES ($1,'M', 'F');", [user_id]);
+            await db.query("INSERT INTO info (user_id, gender, interest) VALUES ($1,'Men', 'Women');", [user_id]);
         } else {
-            await db.query("INSERT INTO info (user_id, gender, interest) VALUES ($1,'F', 'M');", [user_id]);
+            await db.query("INSERT INTO info (user_id, gender, interest) VALUES ($1,'Women', 'Men');", [user_id]);
         }
         res.redirect('/');
     } catch (err){
@@ -61,6 +61,19 @@ app.post('/login', async (req, res) => {
 app.get("/user", async (req, res) => {
     const {rows} = await db.query( 'SELECT users.f_name, users.l_name, info.personality, info.bio, info.gender, info.interest, info.pic FROM users JOIN info ON users.id = $1 AND users.id = info.user_id;', [id])
     res.send(rows);
+})
+
+app.patch("/user", async (req, res) => {
+    try{
+        const {personality, bio, interest}= req.body;
+        console.log(req.body);
+        await db.query( 'UPDATE info SET personality = $1, bio = $2, interest = $3 WHERE user_id = $4;',[personality, bio, interest, id])
+        const {rows} = await db.query( 'SELECT users.f_name, users.l_name, info.personality, info.bio, info.gender, info.interest, info.pic FROM users JOIN info ON users.id = $1 AND users.id = info.user_id;', [id])
+        res.send(rows);
+    } catch(err){
+        res.send("bad request");
+    }
+    
 })
 
 app.listen(3000, ()=>{
