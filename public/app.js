@@ -237,7 +237,7 @@ async function createHomePage(){
 }
 
 $(document).ready(function() {
-    //createLoginPage();
-    $("body").removeClass("login").addClass("homepage")
-    createHomePage()
+    createLoginPage();
+    // $("body").removeClass("login").addClass("homepage")
+    // createHomePage()
 })

@@ -9,7 +9,7 @@ const connectionString= process.env.DATABASE_URL;
 const db = new pg.Pool({
     connectionString
 })
-let id = 1;
+let id = 0;
 let global_interest = ''
 let global_gender = ''
 app.use(express.static('public')) 

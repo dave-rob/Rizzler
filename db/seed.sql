@@ -10,7 +10,7 @@ INSERT INTO users (f_name, l_name, username, email, password) VALUES ('Rachel','
 
 INSERT INTO info (user_id, personality, bio, gender, interest, pic) VALUES ('1', 'hungry, hopeless, tired', 'Looking for my soulmate out there.', 'Men', 'Women', 'profile_pics/johndoe.jpg');
 INSERT INTO info (user_id, personality, bio, gender, interest, pic) VALUES ('2', 'hungry, hopeless, tired', 'Looking for my soulmate out there.', 'Women', 'Men', 'profile_pics/janetdoe.jpg');
-INSERT INTO info (user_id, personality, bio, gender, interest, pic) VALUES ('3', 'hungry, hopeless, tired', 'Looking for my soulmate out there.', 'Men', 'Women', 'profile_pics/jrobertdoe.jpg');
+INSERT INTO info (user_id, personality, bio, gender, interest, pic) VALUES ('3', 'hungry, hopeless, tired', 'Looking for my soulmate out there.', 'Men', 'Women', 'profile_pics/robertdoe.jpg');
 INSERT INTO info (user_id, personality, bio, gender, interest, pic) VALUES ('4', 'hungry, hopeless, tired', 'Looking for my soulmate out there.', 'Women', 'Men', 'profile_pics/bethanydoe.jpg');
 INSERT INTO info (user_id, personality, bio, gender, interest, pic) VALUES ('5', 'hungry, hopeless, tired', 'Looking for my soulmate out there.', 'Men', 'Women', 'profile_pics/richdoe.jpg');
 INSERT INTO info (user_id, personality, bio, gender, interest, pic) VALUES ('6', 'hungry, hopeless, tired', 'Looking for my soulmate out there.', 'Women', 'Men', 'profile_pics/johndoe.jpg');
