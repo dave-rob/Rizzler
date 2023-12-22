@@ -70,7 +70,7 @@ div.register{
     width:100%;
     background-color: #44444C;
     padding: 1.5em;
-    height: 500px;
+    height: 100%;
     color: #D6D6D6;
 }
 
@@ -90,6 +90,24 @@ button.register{
     margin-top: 1em;
 }
 
+div.gender{
+    margin-top: 0.5em;
+    display: flex;
+    justify-content: space-evenly;
+}
+
+input[type='radio']:checked{
+    background-color: #8C8C8C;
+    border: 2px solid white;
+    outline:none;
+}
+
+
+/*=========================home page===============================*/
+container.home{
+    display: flex;
+    justify-content: space-around;
+}
 
 nav.header{
     background-image: url('pictures/login-background.jpg');
@@ -98,4 +116,10 @@ nav.header{
 a.header{
     color: #808080;
     font-family: 'Nanum Gothic', sans-serif;
+}
+
+.left,.right, .center{
+    margin: 2em;
+    width:25%;
+    height: 100%;
 }

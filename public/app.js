@@ -36,7 +36,7 @@ function createLoginPage(){
             .then(response => {
                     $("body").empty();
                     $("body").removeClass("login")
-                    createHeader();
+                    createHomePage();
 
                 })
             .catch(error => {
@@ -70,11 +70,27 @@ function createRegisterPage(){
     let inputEmail = $('<input>').attr('name', 'email');
     let labelPassword = $('<label>').text('Password:');
     let inputPassword = $('<input>').attr('name', 'password').attr('type', 'password');
+    let genderDiv = $('<div>').addClass('gender');
+    var maleRadio = $('<div>').addClass('form-check');
+    var maleInput = $('<input>').addClass('form-check-input').attr({
+        'type': 'radio',
+        'name': 'gender',
+        'value': 'male'
+
+    });
+    var maleLabel = $('<label>').addClass('form-check-label').attr('for', 'male').text('Male');
+    var femaleRadio = $('<div>').addClass('form-check');
+    var femaleInput = $('<input>').addClass('form-check-input').attr({
+        'type': 'radio',
+        'name': 'gender',
+        'value': 'female'
+    });
+    var femaleLabel = $('<label>').addClass('form-check-label').attr('for', 'female').text('Female');
     let registerBtn = $('<button>').addClass('btn btn-light register').text('Register');
-    
+    genderDiv.append(maleRadio.append(maleInput, maleLabel),femaleRadio.append(femaleInput, femaleLabel));
     nameDiv.append(labelFirstname, labelLastname);
     inputDiv.append(inputFirstname, inputLastname);
-    form.append(nameDiv, inputDiv, labelUsername,inputUsername, labelEmail, inputEmail, labelPassword, inputPassword, registerBtn);
+    form.append(nameDiv, inputDiv, labelUsername,inputUsername, labelEmail, inputEmail, labelPassword, inputPassword, genderDiv, registerBtn);
     loginDiv.append(heading1, heading6, form);
     loginContainer.append(loginDiv);
 
@@ -82,15 +98,52 @@ function createRegisterPage(){
 
 function createHeader(){
     let nav = $('<nav>').addClass('navbar header');
-    let container = $('<div>').addClass('container-fluid');
+    let navdiv = $('<div>').addClass('container-fluid');
     let brandLink = $('<a>').addClass('navbar-brand header').text('Rizzler').attr('href', '/').css('margin-left', '20px');
+    
 
-    container.append(brandLink);
-    nav.append(container);
-
+    navdiv.append(brandLink);
+    nav.append(navdiv);
+    
     $('body').prepend(nav);
+}
+
+async function createLeftColumn(){
+    let div1 = $('<div>').css('background-color','yellow').addClass('left');
+    let info = $('<div>').css('border', '1px solid red')
+    div1.append(info);
+    await axios.get('/user')
+            .then((response) => {
+                    const {f_name, l_name, bio, interest, personality, pic} = response.data[0];
+                    console.log(response);
+                    let image = $('<img>').attr('src', pic).attr('height', '100px').attr('width', '100px');
+                    let name = $('<h3>').text(f_name + ' ' + l_name);
+                    let characteristics = $('<em>').text(personality);
+                    let pbio= $('<p>').text(bio);
+                    let interestedIn = $('<p>').text(`Interested in: ${interest}`);
+                    info.append(image, name, characteristics, pbio, interestedIn);
+                    
+                })
+            .catch(error => {
+                message.text('Incorrect Username/Password')
+                slogan.css("margin-top", "3.6em");
+                
+             });
+    return div1
+}
+
+async function createHomePage(){
+    createHeader();
+    let container = $('<container>').addClass('home')
+    let div1 = await createLeftColumn();
+    let div2 = $('<div>').css('background-color','red').text("div").addClass('center');
+    let div3 = $('<div>').css('background-color','blue').text("div").addClass('right');
+    container.append(div1, div2, div3)
+    $('body').append(container)
 }
 
 $(document).ready(function() {
     createLoginPage();
+    // $("body").removeClass("login")
+    // createHomePage()
 })
