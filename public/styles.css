@@ -1,0 +1,91 @@
+body.login{
+    background-image: url('pictures/login-background.jpg');
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 10em;
+    font-family: 'Nanum Gothic', sans-serif;
+}
+
+
+/* =======================Login================================ */
+container.login{
+    margin: 5em;
+    height:100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-evenly;
+}
+
+div.login{
+    margin-left:3em;
+    width:85%;
+    background-color: #44444C;
+    padding: 1.5em;
+    height: 500px;
+    color: #D6D6D6;
+}
+
+form.login{
+    display: flex;
+    flex-direction: column;
+    margin-top: 3em;
+}
+
+h6{
+    margin-top: 1.5em;
+}
+label, input{
+    margin:2px;
+}
+
+.btn{
+    width: 48%;
+    
+}
+
+p.error{
+    color: rgb(146, 56, 56);
+    font-size: small;
+}
+
+div.btns{
+    margin-top: 1em;
+    display: flex;
+    justify-content: space-between;
+}
+
+.slogan{
+    margin-top:5em;
+}
+
+.copy{
+    margin-top: 3em;
+    font-size: x-small;
+}
+
+
+/* =======================Register================================ */
+div.register{
+    width:100%;
+    background-color: #44444C;
+    padding: 1.5em;
+    height: 500px;
+    color: #D6D6D6;
+}
+
+form.register{
+    display: flex;
+    flex-direction: column;
+    margin-top: 3em;
+    width: 100%;
+}
+
+.lastName{
+    margin-left:27%;
+}
+
+button.register{
+    align-self: flex-end;
+    margin-top: 1em;
+}
