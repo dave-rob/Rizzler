@@ -104,6 +104,10 @@ input[type='radio']:checked{
 
 
 /*=========================home page===============================*/
+body.homepage{
+    background-color: #D6D6D6;
+}
+
 container.home{
     display: flex;
     justify-content: space-around;
@@ -124,6 +128,10 @@ a.header{
     height: 100%;
 }
 
+.center{
+    flex: 2;
+}
+
 .edit{
     float:right;
 }
@@ -131,5 +139,37 @@ a.header{
 .info-form{
     display: flex;
     flex-direction: column;
+    padding: 1em;
+}
+
+.rizzler-pic{
+    margin: 1.5em;
+    width: 60%;
+    height: 50%;
+    border: 5px solid #44444C;
+    border-radius: 5px;
+}
+
+div.profile{
+    text-align: center;
+    background-color: #808080;
+    border-radius: 10px;
+    border:5px solid #44444C
+
+}
+.left-swipe, .right-swipe{
+    width: 5%;
+}
+.matchless{
+    margin-bottom: 120px;
+    padding-bottom: 20px;
+}
+
+hr{
+    width: 75%;
+    margin: auto;
+}
+
+.profile-info{
     padding: 1em;
 }

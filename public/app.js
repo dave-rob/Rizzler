@@ -35,7 +35,7 @@ function createLoginPage(){
         axios.post('/login', requestBody)
             .then(response => {
                     $("body").empty();
-                    $("body").removeClass("login")
+                    $("body").removeClass("login").addClass("homepage")
                     createHomePage();
 
                 })
@@ -151,6 +151,7 @@ function editBio(info, response){
                                     console.log("response")
                                     info.empty();
                                     editBio(info, response);
+                                    createHomePage();
                                     })
                             // info.empty()
                             // editBio(info, response);
@@ -175,11 +176,61 @@ async function createLeftColumn(container){
     return div1
 }
 
+function createProfile(response, div, count){
+    let profile = $('<div>').addClass('profile');
+    if (count < 0){
+        let noMatch = $('<img>').attr("src", "pictures/rizz-meter.jpg").addClass("rizzler-pic")
+        let sorry = $('<h2>').text("Sorry, your rizz has ran out").addClass("matchless")
+        div.append(profile.append(noMatch, sorry))
+    } else {
+        const { bio, f_name, l_name, personality, pic } = response.data[count]
+    
+        let left= $('<img>').attr("src", "pictures/left.png").addClass("left-swipe")
+    let picture = $('<img>').attr("src", pic).addClass("rizzler-pic");
+    let right = $('<img>').attr("src", "pictures/right.png").addClass("right-swipe")
+    let infoDiv = $('<div>').addClass("profile-info");
+
+    let h2 = $('<h2>').text(f_name + " " + l_name);
+    let hr = $('<hr>')
+    let persona = $('<em>').text(personality)
+    let bioP =$('<p>').text(bio)
+    infoDiv.append(hr, persona, bioP);
+    profile.append(left,picture, right, h2, infoDiv);
+    div.append(profile);
+    right.on('click', function(){
+        div.empty();
+        count--;
+        createProfile(response, div,count);
+    })
+    left.on('click', function(){
+        div.empty();
+        count--;
+        createProfile(response, div,count);
+    })
+
+    }
+    
+}
+
+async function createCenterColumn(){
+    let div2 = $('<div>').addClass('center');
+    
+    await axios.get('/profile')
+        .then(response => {
+            console.log(response)
+            let count =response.data.length - 1;
+            createProfile(response, div2, count)
+            })
+        
+    return div2;
+}
+
 async function createHomePage(){
+    $('body').empty();
     createHeader();
     let container = $('<container>').addClass('home')
     let div1 = await createLeftColumn(container);
-    let div2 = $('<div>').css('background-color','red').text("div").addClass('center');
+    let div2 = await createCenterColumn();
     let div3 = $('<div>').css('background-color','blue').text("div").addClass('right');
     container.append(div1, div2, div3)
     $('body').append(container)
@@ -187,6 +238,6 @@ async function createHomePage(){
 
 $(document).ready(function() {
     //createLoginPage();
-    $("body").removeClass("login")
+    $("body").removeClass("login").addClass("homepage")
     createHomePage()
 })

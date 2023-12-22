@@ -10,6 +10,8 @@ const db = new pg.Pool({
     connectionString
 })
 let id = 1;
+let global_interest = ''
+let global_gender = ''
 app.use(express.static('public')) 
 
 //lets you get req.body from forms and parse URL-encoded data
@@ -60,6 +62,9 @@ app.post('/login', async (req, res) => {
 
 app.get("/user", async (req, res) => {
     const {rows} = await db.query( 'SELECT users.f_name, users.l_name, info.personality, info.bio, info.gender, info.interest, info.pic FROM users JOIN info ON users.id = $1 AND users.id = info.user_id;', [id])
+    global_interest = rows[0].interest;
+    global_gender = rows[0].gender;
+    //console.log(interested)
     res.send(rows);
 })
 
@@ -74,6 +79,15 @@ app.patch("/user", async (req, res) => {
         res.send("bad request");
     }
     
+})
+
+app.get("/profile", async (req, res)=>{
+    try{
+        const {rows} = await db.query( 'SELECT users.f_name, users.l_name, info.personality, info.bio, info.pic FROM users JOIN info ON users.id != $1 AND users.id = info.user_id AND info.interest = $2 AND info.gender = $3;', [id, global_gender, global_interest])
+        res.send(rows);
+    }catch(err){
+        res.send('bad request')
+    }
 })
 
 app.listen(3000, ()=>{
