@@ -229,6 +229,9 @@ function createProfile(response, div, count){
     })
     left.on('click', function(){
         div.empty();
+        axios.patch('/swipe-left', {
+            profile_id : id,
+        })
         count--;
         createProfile(response, div,count);
     })
@@ -280,7 +283,7 @@ async function createHomePage(){
 }
 
 $(document).ready(function() {
-    createLoginPage();
-    //$("body").removeClass("login").addClass("homepage")
-    //createHomePage()
+    //createLoginPage();
+    $("body").removeClass("login").addClass("homepage")
+    createHomePage()
 })

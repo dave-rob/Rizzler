@@ -23,7 +23,7 @@ const connectionString= process.env.DATABASE_URL;
 const db = new pg.Pool({
     connectionString
 })
-let id = 4;
+let id = 5;
 let global_interest = ''
 let global_gender = ''
 app.use(express.static('public')) 
@@ -153,8 +153,6 @@ app.patch("/swipe-right", async (req, res) => {
     try{
         const {profile_id}= req.body;
         const {rows} = await db.query("select user1_id, user2_id, user1_likes, user2_likes FROM matches WHERE (user1_id = $1 OR user2_id=$1) AND (user1_id = $2 OR user2_id = $2);", [id, profile_id]);
-        console.log(rows[0].user2_likes);
-        console.log(profile_id)
         if(rows[0].user1_id ===profile_id && rows[0].user1_likes === true){
             await db.query("UPDATE matches SET user2_likes = true, match = true WHERE user1_id = $1 and user2_id = $2;",[profile_id, id])
         }else if (rows[0].user1_id ===profile_id) {
@@ -164,6 +162,23 @@ app.patch("/swipe-right", async (req, res) => {
         }
         else {
             await db.query("UPDATE matches SET user1_likes = true WHERE user2_id = $1 and user1_id = $2;",[profile_id, id])
+        }
+        
+        res.send("yay")
+    } catch(err){
+        console.log(err);
+    }
+})
+
+app.patch("/swipe-left", async (req, res) => {
+    try{
+        const {profile_id}= req.body;
+        const {rows} = await db.query("select user1_id, user2_id FROM matches WHERE (user1_id = $1 OR user2_id=$1) AND (user1_id = $2 OR user2_id = $2);", [id, profile_id]);
+        console.log(profile_id)
+        if(rows[0].user1_id ===profile_id){
+            await db.query("UPDATE matches SET user2_likes = false, match = false WHERE user1_id = $1 and user2_id = $2;",[profile_id, id])
+        }else {
+            await db.query("UPDATE matches SET user1_likes = false, match = false WHERE user2_id = $1 and user1_id = $2;",[profile_id, id])
         }
         
         res.send("yay")
