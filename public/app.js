@@ -57,7 +57,28 @@ function createRegisterPage(){
     let loginDiv = $('<div>').addClass('register');
     let heading1 = $('<h1>').html('<strong>Lets get started!</strong>');
     let heading6 = $('<h6>').text('Lets create an account.');
-    let form = $('<form>').addClass('register').attr("method", "post").attr("action", '/register');
+    let form = $('<form>').addClass('register').attr("method", "post").attr({"action": '/register', "enctype": "multipart/form-data"});
+    let uploaddiv = $('<div>').addClass("upload");
+    let fileInput = $('<input>').attr({
+        'type': 'file',
+        'accept': 'image/*',
+        'name': 'image',
+        'id': 'file',
+    });
+    let label = $('<label>').attr({
+        'for': 'file',
+        'style': 'cursor: pointer;'
+    }).text('Upload Image');
+    let image = $('<img>').attr('id', 'picture');
+    fileInput.on('change', function(event) {
+        let reader = new FileReader();
+        reader.onload = function() {
+            image.attr('src',reader.result);
+        };
+        reader.readAsDataURL(event.target.files[0]);
+    });
+    uploaddiv.append(fileInput, image, label);
+
     let nameDiv = $('<div>').addClass('names');
     let inputDiv = $('<div>').addClass('inputs');
     let labelFirstname = $('<label>').text('First Name:');
@@ -90,7 +111,7 @@ function createRegisterPage(){
     genderDiv.append(maleRadio.append(maleInput, maleLabel),femaleRadio.append(femaleInput, femaleLabel));
     nameDiv.append(labelFirstname, labelLastname);
     inputDiv.append(inputFirstname, inputLastname);
-    form.append(nameDiv, inputDiv, labelUsername,inputUsername, labelEmail, inputEmail, labelPassword, inputPassword, genderDiv, registerBtn);
+    form.append(uploaddiv, nameDiv, inputDiv, labelUsername,inputUsername, labelEmail, inputEmail, labelPassword, inputPassword, genderDiv, registerBtn);
     loginDiv.append(heading1, heading6, form);
     loginContainer.append(loginDiv);
 
@@ -183,7 +204,7 @@ function createProfile(response, div, count){
         let sorry = $('<h2>').text("Sorry, your rizz has ran out").addClass("matchless")
         div.append(profile.append(noMatch, sorry))
     } else {
-        const { bio, f_name, l_name, personality, pic } = response.data[count]
+        const { id, bio, f_name, l_name, personality, pic } = response.data[count]
     
         let left= $('<img>').attr("src", "pictures/left.png").addClass("left-swipe")
     let picture = $('<img>').attr("src", pic).addClass("rizzler-pic");
@@ -200,6 +221,10 @@ function createProfile(response, div, count){
     right.on('click', function(){
         div.empty();
         count--;
+        axios.patch('/swipe-right', {
+            profile_id : id,
+        })
+        .then(response => console.log(response));
         createProfile(response, div,count);
     })
     left.on('click', function(){
@@ -256,6 +281,6 @@ async function createHomePage(){
 
 $(document).ready(function() {
     createLoginPage();
-    // $("body").removeClass("login").addClass("homepage")
-    // createHomePage()
+    //$("body").removeClass("login").addClass("homepage")
+    //createHomePage()
 })

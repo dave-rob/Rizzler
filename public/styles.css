@@ -102,6 +102,26 @@ input[type='radio']:checked{
     outline:none;
 }
 
+div.upload {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 1em;
+}
+
+#file {
+    display: none;
+}
+
+#picture {
+    width:100px;
+    height:100px;
+    align-self: center;
+    border-radius: 100%;
+    border-color: #D6D6D6;
+    background-color: #D6D6D6;
+}
+
 
 /*=========================home page===============================*/
 body.homepage{
@@ -126,7 +146,7 @@ a.header{
 .left,.right, .center{
     margin: 2em;
     width:25%;
-    /* height: 80vh; */
+    height: 80vh;
 }
 
 .center{

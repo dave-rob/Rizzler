@@ -2,14 +2,28 @@ import express from 'express';
 import pg from 'pg';
 import basicAuth from 'express-basic-auth';
 import 'dotenv/config'
+import multer from 'multer';
 const app = express();
+let imagefullname = ''
 
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+      cb(null, 'public/profile_pics/')
+    },
+    filename: function (req, file, cb) {
+      const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9)
+      imagefullname= file.fieldname + '-' + uniqueSuffix+ ".jpg"
+      cb(null, imagefullname)
+    }
+  })
+  
+  const upload = multer({ storage: storage })
 const connectionString= process.env.DATABASE_URL;
 
 const db = new pg.Pool({
     connectionString
 })
-let id = 1;
+let id = 4;
 let global_interest = ''
 let global_gender = ''
 app.use(express.static('public')) 
@@ -18,24 +32,27 @@ app.use(express.static('public'))
 app.use(express.urlencoded({ extended:true}));
 app.use(express.json());
 
-app.post('/register', async (req, res)=>{
+app.post('/register', upload.single('image'), async (req, res)=>{
     try{
+        console.log(req.body);
         let body = req.body;
         for(let val in body){
             if(body[val]===''){
                 body[val] = null;
             }
         }
+        console.log(req.file);
         const { f_name, l_name, username, email, password, gender } = body;
         console.log(f_name, l_name, username, email, password);
         await db.query("INSERT INTO users (f_name, l_name, username, email, password) VALUES ($1, $2, $3, $4,crypt($5, gen_salt('bf')));",
         [f_name, l_name, username, email, password])
         const { rows } = await db.query("SELECT id from users WHERE username = $1;", [username]);
         let user_id= rows[0].id
+        let path = `profile_pics/${imagefullname}`
         if(gender === 'male'){
-            await db.query("INSERT INTO info (user_id, gender, interest) VALUES ($1,'Men', 'Women');", [user_id]);
+            await db.query("INSERT INTO info (user_id, gender, interest, pic) VALUES ($1,'Men', 'Women', $2);", [user_id, path]);
         } else {
-            await db.query("INSERT INTO info (user_id, gender, interest) VALUES ($1,'Women', 'Men');", [user_id]);
+            await db.query("INSERT INTO info (user_id, gender, interest, pic) VALUES ($1,'Women', 'Men', $2);", [user_id, path]);
         }
         await db.query('insert into matches(user1_id, user2_id) Select users.id, info.id from users join info on users.id!=info.user_id and users.id=$1 AND users.id IS NOT NULL;', [user_id]);
         res.redirect('/');
@@ -84,9 +101,29 @@ app.patch("/user", async (req, res) => {
 
 app.get("/profile", async (req, res)=>{
     try{
-        const {rows} = await db.query( 'SELECT users.f_name, users.l_name, info.personality, info.bio, info.pic FROM users JOIN info ON users.id != $1 AND users.id = info.user_id AND info.interest = $2 AND info.gender = $3;', [id, global_gender, global_interest])
+        const {rows} = await db.query( 'SELECT users.id, users.f_name, users.l_name, info.personality, info.bio, info.pic FROM users JOIN info ON users.id != $1 AND users.id = info.user_id AND info.interest = $2 AND info.gender = $3;', [id, global_gender, global_interest])
+        let profiles = []
+        
+            for (let i = rows.length-1; i>=0; i--){
+              //console.log(rows[count].f_name);  
+            let user = await db.query("SELECT user1_id,user2_id, user1_likes, user2_likes FROM matches WHERE (user1_id = $1 or user2_id = $1) AND (user1_id = $2 OR user2_id = $2);",[id, rows[i].id])
+            console.log(user.rows[0].user1_id, id, user.rows[0].user1_likes, user.rows[0].user2_id, user.rows[0].user2_likes)
+            if(user.rows[0].user1_id === id && user.rows[0].user1_likes != null){
+                console.log("user1 null")
+                rows.splice(i, 1)
+            } if(user.rows[0].user2_id === id && user.rows[0].user2_likes != null){
+                console.log("user2 null")
+                rows.splice(i,1)
+            }
+            //console.log(count);
+            
+            }
+            console.log(rows.length)
+    
+        //console.log(rows);
         res.send(rows);
     }catch(err){
+        console.log(err)
         res.send('bad request')
     }
 })
@@ -94,7 +131,7 @@ app.get("/profile", async (req, res)=>{
 app.get("/matches", async (req, res) =>{
     try{
         const {rows} = await db.query("select user1_id, user2_id FROM matches WHERE match='t' AND (user1_id = $1 OR user2_id=$1);", [id]);
-        console.log(rows);
+        //console.log(rows);
         let matches = [];
         for(let i =0; i<rows.length; i++){
             if(rows[i].user1_id === id){
@@ -109,6 +146,29 @@ app.get("/matches", async (req, res) =>{
     } catch (err){
         console.log(err);
         res.send('bad request')
+    }
+})
+
+app.patch("/swipe-right", async (req, res) => {
+    try{
+        const {profile_id}= req.body;
+        const {rows} = await db.query("select user1_id, user2_id, user1_likes, user2_likes FROM matches WHERE (user1_id = $1 OR user2_id=$1) AND (user1_id = $2 OR user2_id = $2);", [id, profile_id]);
+        console.log(rows[0].user2_likes);
+        console.log(profile_id)
+        if(rows[0].user1_id ===profile_id && rows[0].user1_likes === true){
+            await db.query("UPDATE matches SET user2_likes = true, match = true WHERE user1_id = $1 and user2_id = $2;",[profile_id, id])
+        }else if (rows[0].user1_id ===profile_id) {
+            await db.query("UPDATE matches SET user2_likes = true WHERE user1_id = $1 and user2_id = $2;",[profile_id, id])
+        } else if (rows[0].user2_id ===profile_id && rows[0].user2_likes === true){
+            await db.query("UPDATE matches SET user1_likes = true, match = true WHERE user2_id = $1 and user1_id = $2;",[profile_id, id])
+        }
+        else {
+            await db.query("UPDATE matches SET user1_likes = true WHERE user2_id = $1 and user1_id = $2;",[profile_id, id])
+        }
+        
+        res.send("yay")
+    } catch(err){
+        console.log(err);
     }
 })
 
