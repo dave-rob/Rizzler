@@ -106,6 +106,7 @@ input[type='radio']:checked{
 /*=========================home page===============================*/
 body.homepage{
     background-color: #D6D6D6;
+    font-family: 'Nanum Gothic', sans-serif;
 }
 
 container.home{
@@ -119,13 +120,13 @@ nav.header{
 
 a.header{
     color: #808080;
-    font-family: 'Nanum Gothic', sans-serif;
+    
 }
 
 .left,.right, .center{
     margin: 2em;
     width:25%;
-    height: 100%;
+    /* height: 80vh; */
 }
 
 .center{
@@ -172,4 +173,37 @@ hr{
 
 .profile-info{
     padding: 1em;
+}
+
+.right{
+    overflow-y: scroll;
+    background-color: #808080;
+    border:5px solid #44444C;
+    text-align: center;
+}
+
+.messages-header{
+    background-color: #44444C;
+    color:#D6D6D6;
+}
+
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+    
+::-webkit-scrollbar-track {
+border: 1px solid #44444C;
+}
+
+::-webkit-scrollbar-thumb {
+background: #44444C;  
+}
+
+::-webkit-scrollbar-thumb:hover {
+background: #44444C;  
+}
+
+.match{
+    padding:1em;
 }

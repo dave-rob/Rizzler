@@ -225,14 +225,32 @@ async function createCenterColumn(){
     return div2;
 }
 
+function createRightColumn(){
+    let div3 = $('<div>').addClass('right');
+    let h3 = $('<h3>').text("Matches").addClass("messages-header");
+    axios.get('/matches')
+        .then(response => {
+            console.log(response);
+            let data = response.data
+            for(let i = 0; i < data.length; i++){
+                let div= $('<div>').text(data[i].f_name + " " + data[i].l_name).addClass("match")
+                div3.append(div)
+            }
+
+        })
+    
+    
+    return div3;
+}
+
 async function createHomePage(){
     $('body').empty();
     createHeader();
     let container = $('<container>').addClass('home')
     let div1 = await createLeftColumn(container);
     let div2 = await createCenterColumn();
-    let div3 = $('<div>').css('background-color','blue').text("div").addClass('right');
-    container.append(div1, div2, div3)
+    let div3 = createRightColumn();
+    container.append(div1, div2,div3)
     $('body').append(container)
 }
 

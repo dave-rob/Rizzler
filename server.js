@@ -9,7 +9,7 @@ const connectionString= process.env.DATABASE_URL;
 const db = new pg.Pool({
     connectionString
 })
-let id = 0;
+let id = 1;
 let global_interest = ''
 let global_gender = ''
 app.use(express.static('public')) 
@@ -37,6 +37,7 @@ app.post('/register', async (req, res)=>{
         } else {
             await db.query("INSERT INTO info (user_id, gender, interest) VALUES ($1,'Women', 'Men');", [user_id]);
         }
+        await db.query('insert into matches(user1_id, user2_id) Select users.id, info.id from users join info on users.id!=info.user_id and users.id=$1 AND users.id IS NOT NULL;', [user_id]);
         res.redirect('/');
     } catch (err){
         console.error(err)
@@ -86,6 +87,27 @@ app.get("/profile", async (req, res)=>{
         const {rows} = await db.query( 'SELECT users.f_name, users.l_name, info.personality, info.bio, info.pic FROM users JOIN info ON users.id != $1 AND users.id = info.user_id AND info.interest = $2 AND info.gender = $3;', [id, global_gender, global_interest])
         res.send(rows);
     }catch(err){
+        res.send('bad request')
+    }
+})
+
+app.get("/matches", async (req, res) =>{
+    try{
+        const {rows} = await db.query("select user1_id, user2_id FROM matches WHERE match='t' AND (user1_id = $1 OR user2_id=$1);", [id]);
+        console.log(rows);
+        let matches = [];
+        for(let i =0; i<rows.length; i++){
+            if(rows[i].user1_id === id){
+                let user2 = await db.query("SELECT f_name, l_name, pic FROM users JOIN info ON users.id = $1 AND users.id = user_id;", [rows[i].user2_id])
+                matches.unshift(user2.rows[0]);
+            } else{
+                let user1 = await db.query("SELECT f_name, l_name, pic FROM users JOIN info ON users.id = $1 AND users.id = user_id;",[rows[i].user1_id])
+                matches.unshift(user1.rows[0]);
+            }
+        }
+        res.send(matches);
+    } catch (err){
+        console.log(err);
         res.send('bad request')
     }
 })
