@@ -29,3 +29,10 @@ CREATE TABLE matches(
     user2_likes BOOLEAN,
     match BOOLEAN
 );
+
+CREATE TABLE messages(
+    id SERIAL PRIMARY Key,
+    match_id int REFERENCES matches(id),
+    user_id int REFERENCES users(id),
+    message text
+);

@@ -23,7 +23,7 @@ const connectionString= process.env.DATABASE_URL;
 const db = new pg.Pool({
     connectionString
 })
-let id = 5;
+
 let global_interest = ''
 let global_gender = ''
 app.use(express.static('public')) 
@@ -70,15 +70,17 @@ app.post('/login', async (req, res) => {
     if (rows.length ===0){
         throw new Error;
     }
-    id = rows[0].id;
-    res.send("got it");
+
+    res.send(rows[0]);
     } catch(err){
         console.log("bad login")
+        console.log(err);
         res.status(401).send("Incorrect Username and Password!")
     }
 })
 
-app.get("/user", async (req, res) => {
+app.get("/user/:id", async (req, res) => {
+    const {id} = req.params;
     const {rows} = await db.query( 'SELECT users.f_name, users.l_name, info.personality, info.bio, info.gender, info.interest, info.pic FROM users JOIN info ON users.id = $1 AND users.id = info.user_id;', [id])
     global_interest = rows[0].interest;
     global_gender = rows[0].gender;
@@ -86,8 +88,9 @@ app.get("/user", async (req, res) => {
     res.send(rows);
 })
 
-app.patch("/user", async (req, res) => {
+app.patch("/user/:id", async (req, res) => {
     try{
+        const {id} = req.params;
         const {personality, bio, interest}= req.body;
         console.log(req.body);
         await db.query( 'UPDATE info SET personality = $1, bio = $2, interest = $3 WHERE user_id = $4;',[personality, bio, interest, id])
@@ -99,19 +102,20 @@ app.patch("/user", async (req, res) => {
     
 })
 
-app.get("/profile", async (req, res)=>{
+app.get("/profile/:id", async (req, res)=>{
     try{
+        const {id} = req.params;
         const {rows} = await db.query( 'SELECT users.id, users.f_name, users.l_name, info.personality, info.bio, info.pic FROM users JOIN info ON users.id != $1 AND users.id = info.user_id AND info.interest = $2 AND info.gender = $3;', [id, global_gender, global_interest])
         let profiles = []
         
             for (let i = rows.length-1; i>=0; i--){
               //console.log(rows[count].f_name);  
             let user = await db.query("SELECT user1_id,user2_id, user1_likes, user2_likes FROM matches WHERE (user1_id = $1 or user2_id = $1) AND (user1_id = $2 OR user2_id = $2);",[id, rows[i].id])
-            console.log(user.rows[0].user1_id, id, user.rows[0].user1_likes, user.rows[0].user2_id, user.rows[0].user2_likes)
-            if(user.rows[0].user1_id === id && user.rows[0].user1_likes != null){
+            
+            if(user.rows[0].user1_id == id && user.rows[0].user1_likes != null){
                 console.log("user1 null")
                 rows.splice(i, 1)
-            } if(user.rows[0].user2_id === id && user.rows[0].user2_likes != null){
+            } if(user.rows[0].user2_id == id && user.rows[0].user2_likes != null){
                 console.log("user2 null")
                 rows.splice(i,1)
             }
@@ -128,17 +132,24 @@ app.get("/profile", async (req, res)=>{
     }
 })
 
-app.get("/matches", async (req, res) =>{
+app.get("/matches/:id", async (req, res) =>{
     try{
-        const {rows} = await db.query("select user1_id, user2_id FROM matches WHERE match='t' AND (user1_id = $1 OR user2_id=$1);", [id]);
-        //console.log(rows);
+        const {id} = req.params;
+        const {rows} = await db.query("select id,user1_id, user2_id FROM matches WHERE match='t' AND (user1_id = $1 OR user2_id=$1);", [id]);
+        console.log(rows);
         let matches = [];
         for(let i =0; i<rows.length; i++){
-            if(rows[i].user1_id === id){
-                let user2 = await db.query("SELECT f_name, l_name, pic FROM users JOIN info ON users.id = $1 AND users.id = user_id;", [rows[i].user2_id])
+            //et match_id = rows[i].id
+            if(rows[i].user1_id == id){
+                let user2 = await db.query("SELECT users.id, f_name, l_name, pic FROM users JOIN info ON users.id = $1 AND users.id = user_id;", [rows[i].user2_id])
+                user2.rows[0].match_id = rows[i].id
+                console.log(user2.rows[0])
                 matches.unshift(user2.rows[0]);
+
             } else{
-                let user1 = await db.query("SELECT f_name, l_name, pic FROM users JOIN info ON users.id = $1 AND users.id = user_id;",[rows[i].user1_id])
+                let user1 = await db.query("SELECT users.id, f_name, l_name, pic FROM users JOIN info ON users.id = $1 AND users.id = user_id;",[rows[i].user1_id])
+                user1.rows[0].match_id = rows[i].id
+                console.log(user1.rows[0])
                 matches.unshift(user1.rows[0]);
             }
         }
@@ -185,6 +196,18 @@ app.patch("/swipe-left", async (req, res) => {
     } catch(err){
         console.log(err);
     }
+})
+
+app.get('/messages/:match_id', async (req,res)=>{
+    try {
+       const {match_id } = req.params;
+    const { rows } = await db.query('SELECT message FROM messages WHERE match_id = $1;', [match_id])
+    console.log(rows);
+    res.send(rows) 
+    } catch(err){
+        console.error(err);
+    }
+    
 })
 
 app.listen(3000, ()=>{

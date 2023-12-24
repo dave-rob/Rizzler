@@ -1,6 +1,6 @@
 
 let loginContainer = $('<container>').addClass('login');
-
+let overallId = 0;
 function createLoginPage(){
     
     let image = $('<img>').attr('src', 'pictures/front-image.jpg').attr('height', '500px').attr('width', '400px');
@@ -34,6 +34,8 @@ function createLoginPage(){
 
         axios.post('/login', requestBody)
             .then(response => {
+                    const {id} = response.data;
+                    overallId = id;
                     $("body").empty();
                     $("body").removeClass("login").addClass("homepage")
                     createHomePage();
@@ -130,20 +132,20 @@ function createHeader(){
 }
 
 function editBio(info, response){
-    let editButton = $('<button>').addClass('edit').text('edit')
-                    const {f_name, l_name, bio, interest, personality, pic} = response.data[0];
+    let editButton = $('<img>').addClass('edit').attr('src', 'pictures/editing.png')
+                    const { f_name, l_name, bio, interest, personality, pic} = response.data[0];
                     console.log(response);
-                    let image = $('<img>').attr('src', pic).attr('height', '100px').attr('width', '100px');
-                    let name = $('<h3>').text(f_name + ' ' + l_name);
+                    let image = $('<img>').attr('src', pic).addClass("infoPic");
+                    let name = $('<h3>').text(f_name + ' ' + l_name).css("margin-bottom", "0");
                     let characteristics = $('<em>').text(personality);
-                    let pbio= $('<p>').text(bio);
-                    let interestedIn = $('<p>').text(`Interested in: ${interest}`);
+                    let pbio= $('<p>').text(bio).css("margin-top","1em");
+                    let interestedIn = $('<p>').text(`Interested in: ${interest}`).css("margin-bottom", "0");
                     info.append(editButton, image, name, characteristics, pbio, interestedIn);
 
                     editButton.on('click', function(){
                         info.empty();
-                        let saveButton = $('<button>').addClass('edit').text('Save')
-                        let image = $('<img>').attr('src', pic).attr('height', '100px').attr('width', '100px');
+                        let saveButton = $('<img>').addClass('edit').attr('src', 'pictures/diskette.png')
+                        let image = $('<img>').attr('src', pic).addClass("infoPic");
                         let name2 = $('<h3>').text(f_name + ' ' + l_name);
                         let form = $('<form>').addClass("info-form");
                         let traitsLabel = $('<label>').text("Personality Traits:");
@@ -163,7 +165,7 @@ function editBio(info, response){
                         info.append(saveButton,image, name2, form.append(traitsLabel,characteristics2,bioLabel, newBio,interestsLabel, newInterest))
 
                         saveButton.on('click', function(){
-                            axios.patch("/user",{
+                            axios.patch(`/user/${overallId}`,{
                                 "personality": characteristics2.val(),
                                 bio: newBio.val(),
                                 interest: newInterest.val()
@@ -182,9 +184,9 @@ function editBio(info, response){
 
 async function createLeftColumn(container){
     let div1 = $('<div>').css('background-color','yellow').addClass('left');
-    let info = $('<div>').css('border', '1px solid red')
+    let info = $('<div>').addClass('info');
     div1.append(info);
-    await axios.get('/user')
+    await axios.get(`/user/${overallId}`)
             .then((response) => {
                     editBio(info, response)
                     
@@ -243,7 +245,7 @@ function createProfile(response, div, count){
 async function createCenterColumn(){
     let div2 = $('<div>').addClass('center');
     
-    await axios.get('/profile')
+    await axios.get(`/profile/${overallId}`)
         .then(response => {
             console.log(response)
             let count =response.data.length - 1;
@@ -256,16 +258,44 @@ async function createCenterColumn(){
 function createRightColumn(){
     let div3 = $('<div>').addClass('right');
     let h3 = $('<h3>').text("Matches").addClass("messages-header");
-    axios.get('/matches')
+    div3.append(h3)
+    axios.get(`/matches/${overallId}`)
         .then(response => {
             console.log(response);
             let data = response.data
             for(let i = 0; i < data.length; i++){
-                let div= $('<div>').text(data[i].f_name + " " + data[i].l_name).addClass("match")
-                div3.append(div)
+                let div= $('<div>').addClass("match").attr("id", `match${i}`)
+                let img = $('<img>').attr('src', data[i].pic).addClass("message-pic");
+                let name = $('<h6>').text(data[i].f_name + " " + data[i].l_name);
+                let textDiv = $('<div>').addClass("messagebox")
+                let input = $('<textarea>').attr({"name":"messages", "rows":"1"}).addClass("message");
+                let send = $('<button>').text('send').addClass("message")
+                textDiv.append(input,send)
+                let messagesDiv = $('<div>').addClass('messages-div').attr('id', `messages${i}`).hide();
+                div3.append(div.append(img, name), messagesDiv.append(textDiv))
+                let match_id=data[i].match_id;
+                axios.get(`/messages/${match_id}`)
+                        .then(response => {
+                            for(let i = 0; i < response.data.length; i++){
+                                let text = $('<p>').text(response.data[i].message)
+                                messagesDiv.append(text);
+                            };   
+                        })
+                div.on('click', async function(){
+                    
+                    //console.log($(this).attr('id'));
+                    // let userText = $('<p>').text("hey how are you?");
+                    // let otherText = $('<p>').text("Hey. Im good thank you.")
+                    // messagesDiv.append(userText, otherText)
+                    messagesDiv.toggle();
+                    
+
+                    
+                })
             }
 
         })
+    
     
     
     return div3;
@@ -283,7 +313,7 @@ async function createHomePage(){
 }
 
 $(document).ready(function() {
-    //createLoginPage();
-    $("body").removeClass("login").addClass("homepage")
-    createHomePage()
+    createLoginPage();
+    // $("body").removeClass("login").addClass("homepage")
+    // createHomePage()
 })
