@@ -1,6 +1,6 @@
 
 let loginContainer = $('<container>').addClass('login');
-let overallId = 0;
+let overallId = 3;
 function createLoginPage(){
     
     let image = $('<img>').attr('src', 'pictures/front-image.jpg').attr('height', '500px').attr('width', '400px');
@@ -200,7 +200,7 @@ async function createLeftColumn(container){
 }
 
 function createProfile(response, div, count){
-    let profile = $('<div>').addClass('profile');
+    let profile = $('<div>').removeClass().addClass('profile magictime puffIn');
     if (count < 0){
         let noMatch = $('<img>').attr("src", "pictures/rizz-meter.jpg").addClass("rizzler-pic")
         let sorry = $('<h2>').text("Sorry, your rizz has ran out").addClass("matchless")
@@ -210,6 +210,7 @@ function createProfile(response, div, count){
     
         let left= $('<img>').attr("src", "pictures/left.png").addClass("left-swipe")
     let picture = $('<img>').attr("src", pic).addClass("rizzler-pic");
+    
     let right = $('<img>').attr("src", "pictures/right.png").addClass("right-swipe")
     let infoDiv = $('<div>').addClass("profile-info");
 
@@ -221,17 +222,22 @@ function createProfile(response, div, count){
     profile.append(left,picture, right, h2, infoDiv);
     div.append(profile);
     right.on('click', function(){
+        profile.addClass('magictime rotateRight');
         div.empty();
         count--;
-        axios.patch('/swipe-right', {
+        axios.patch(`/swipe-right/${overallId}`, {
             profile_id : id,
         })
         .then(response => console.log(response));
         createProfile(response, div,count);
     })
     left.on('click', function(){
+        profile.addClass('magictime rotateRight');
         div.empty();
-        axios.patch('/swipe-left', {
+        // picture.hover(function () {
+        //     $(this).
+        // });
+        axios.patch(`/swipe-left/${overallId}`, {
             profile_id : id,
         })
         count--;
@@ -271,14 +277,22 @@ function createRightColumn(){
                 let input = $('<textarea>').attr({"name":"messages", "rows":"1"}).addClass("message");
                 let send = $('<button>').text('send').addClass("message")
                 textDiv.append(input,send)
-                let messagesDiv = $('<div>').addClass('messages-div').attr('id', `messages${i}`).hide();
-                div3.append(div.append(img, name), messagesDiv.append(textDiv))
+                let messagesDiv = $('<div>').addClass('messages-div').attr('id', `messages${i}`);
+                let dropDown = $('<div>').hide();
+                div3.append(div.append(img, name), dropDown.append(messagesDiv, textDiv))
                 let match_id=data[i].match_id;
                 axios.get(`/messages/${match_id}`)
                         .then(response => {
                             for(let i = 0; i < response.data.length; i++){
-                                let text = $('<p>').text(response.data[i].message)
-                                messagesDiv.append(text);
+                                if(response.data[i].user_id == overallId){
+                                    let text = $('<p>').text(response.data[i].message).addClass("right-message");
+                                    messagesDiv.append(text);
+                                } else {
+                                    let text = $('<p>').text(response.data[i].message).addClass("left-message");
+                                    messagesDiv.append(text);
+                                }
+                                
+                                
                             };   
                         })
                 div.on('click', async function(){
@@ -287,9 +301,17 @@ function createRightColumn(){
                     // let userText = $('<p>').text("hey how are you?");
                     // let otherText = $('<p>').text("Hey. Im good thank you.")
                     // messagesDiv.append(userText, otherText)
-                    messagesDiv.toggle();
-                    
-
+                    dropDown.toggle();   
+                })
+                send.on('click', function(){
+                    let text = $('<p>').text(input.val()).addClass("right-message");
+                    messagesDiv.prepend(text)
+                    axios.post(`messages/${match_id}`,{
+                        user_id: overallId,
+                         text: input.val()
+                    })
+                        .then(response => console.log(response));
+                    input.val('')
                     
                 })
             }
@@ -313,7 +335,7 @@ async function createHomePage(){
 }
 
 $(document).ready(function() {
-    createLoginPage();
-    // $("body").removeClass("login").addClass("homepage")
-    // createHomePage()
+    // createLoginPage();
+    $("body").removeClass("login").addClass("homepage")
+    createHomePage()
 })

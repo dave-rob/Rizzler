@@ -160,8 +160,9 @@ app.get("/matches/:id", async (req, res) =>{
     }
 })
 
-app.patch("/swipe-right", async (req, res) => {
+app.patch("/swipe-right/:id", async (req, res) => {
     try{
+        const{id} = req.params;
         const {profile_id}= req.body;
         const {rows} = await db.query("select user1_id, user2_id, user1_likes, user2_likes FROM matches WHERE (user1_id = $1 OR user2_id=$1) AND (user1_id = $2 OR user2_id = $2);", [id, profile_id]);
         if(rows[0].user1_id ===profile_id && rows[0].user1_likes === true){
@@ -181,8 +182,9 @@ app.patch("/swipe-right", async (req, res) => {
     }
 })
 
-app.patch("/swipe-left", async (req, res) => {
+app.patch("/swipe-left/:id", async (req, res) => {
     try{
+        const {id} = req.params;
         const {profile_id}= req.body;
         const {rows} = await db.query("select user1_id, user2_id FROM matches WHERE (user1_id = $1 OR user2_id=$1) AND (user1_id = $2 OR user2_id = $2);", [id, profile_id]);
         console.log(profile_id)
@@ -201,13 +203,24 @@ app.patch("/swipe-left", async (req, res) => {
 app.get('/messages/:match_id', async (req,res)=>{
     try {
        const {match_id } = req.params;
-    const { rows } = await db.query('SELECT message FROM messages WHERE match_id = $1;', [match_id])
+    const { rows } = await db.query('SELECT message, user_id FROM messages WHERE match_id = $1;', [match_id])
     console.log(rows);
     res.send(rows) 
     } catch(err){
         console.error(err);
     }
     
+})
+
+app.post('/messages/:match_id', async (req,res)=>{
+    try{
+        const {match_id} = req.params;
+        const { user_id, text } = req.body;
+        await db.query(`INSERT INTO messages VALUES (DEFAULT, $1, $2, $3);`,[match_id, user_id, text]);
+        res.send("successfully sent")
+    } catch (err){
+        console.error(err);
+    }
 })
 
 app.listen(3000, ()=>{
