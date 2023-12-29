@@ -1,6 +1,51 @@
 
 let loginContainer = $('<container>').addClass('login');
 let overallId = 0;
+const pickupLines = ["Math is so confusing. It's always talking about x and y and never you and I.",
+"Are you a vape? Because I'd never use you.",
+"Are you the school stairs? Because you take my breath away.",
+"Are you iron? Because I don't get enough of you?",
+"Are you John Cena? Because I've never Cena girl like you before.",
+"Are you chicken fingers and fries? Because I don't care how many options I have, I will always choose you.",
+"Are you Japan? Because I just Tok-yo heart.",
+"Are you my future? Because my parents told me to focus on you.",
+"I want you ... to look at the first three words.",
+"I don’t play cards but I feel like I’m about to pull a queen.",
+"I can be wonder woman, cat woman, or your woman.",
+"I can be Batman, Iron Man, Spiderman, or your man.",
+"All the rizz lines are taken ... but are you taken?",
+"No pen, no paper. But you still draw my attention.",
+"I don’t have a pickup line but I’ll pick you up at nine.",
+"Are you anxiety? Because my heart races every time I see you.",
+"I guess I’m a photographer because I can picture us together.",
+"I’m a pen, you're a highlighter. I write the future, you make it brighter.",
+"Are you a library book? Because I'm checking you out.",
+"I couldn't fall asleep, so I fell for you instead.",
+"Are you a piano? Because I won’t ever play you.",
+"Ouch! Did you just come out of an oven? Because you are so hot.",
+"I'm so mad at Spotify. I searched for the the hottest single and you weren't there.",
+"Are you a high test score? Because I want to take you home and show you to my mom.",
+"Are you a test? Because my mom said don't cheat on important things.",
+"My phone is 4G, but my heart is 4U.",
+"Hey, is your mom an artist? Because she made a masterpiece?",
+"Are you Captain Hook? Because I'm trying to play hooky with you.",
+"If you were poison, you would be the death of me.",
+"Matching outfits are cool, but matching last names is cooler.",
+"Are you a camera? Because when I look at you I smile.",
+"The alphabet starts with ABC. The numbers start with 123, but the universe starts with U N I.",
+"Are you Amazon? Because in three hours you'll be at my door.",
+"I'm not Abraham, but when are we Lincoln?",
+"Albert Einstein said that 'there is nothing faster than lightning.' But he hasn’t seen how fast I fell for you.",
+"Do you play soccer? Because you're definitely a keeper?",
+"Are you my bed? Because I never want to leave you.",
+"Do you like soccer? My favorite player is Ronaldo, but we can still get Messi.",
+"Are you French? Because Eiffel for you?"]
+
+function randomPickupLine(){
+    let randomNumber = Math.floor(Math.random()*pickupLines.length)
+    return pickupLines[randomNumber];
+}
+
 function createLoginPage(){
     
     let image = $('<img>').attr('src', 'pictures/front-image.jpg').attr('height', '500px').attr('width', '400px');
@@ -38,6 +83,7 @@ function createLoginPage(){
                     overallId = id;
                     $("body").empty();
                     $("body").removeClass("login").addClass("homepage")
+                    loginContainer.empty();
                     createHomePage();
 
                 })
@@ -167,10 +213,13 @@ function editBio(info, response){
                         info.append(saveButton,image, name2, form.append(traitsLabel,characteristics2,bioLabel, newBio,interestsLabel, newInterest), deletebutton)
 
                         deletebutton.on('click', function(){
-                            alert("button pressed")
                             axios.delete(`/user/${overallId}`)
-                               // .then(response => console.log(response))
-                            createLoginPage();
+                                .then(response => {
+                                    console.log(response)
+                                    $('body').empty();
+                                    $('body').removeClass().addClass('login')
+                                    createLoginPage();
+                                })
                         })
 
                         saveButton.on('click', function(){
@@ -192,9 +241,16 @@ function editBio(info, response){
 }
 
 async function createLeftColumn(container){
-    let div1 = $('<div>').css('background-color','yellow').addClass('left');
+    let div1 = $('<div>').addClass('left');
     let info = $('<div>').addClass('info');
-    div1.append(info);
+    let pickUpLineGenerator = $('<div>').addClass('generator');
+    let title = $('<h4>').text("Need help with your rizz?");
+    let button = $('<button>').text("Generate a pickup line").addClass('btn delete');
+    let line = $('<p>').text(' ').addClass('line');
+    button.on('click', function(){
+        line.text(randomPickupLine())
+    })
+    div1.append(info, pickUpLineGenerator.append(title, button, line));
     await axios.get(`/user/${overallId}`)
             .then((response) => {
                     editBio(info, response)
@@ -323,17 +379,17 @@ function createRightColumn(){
                                 
                             };   
                         })
-                div.on('click', async function(){
+                div.on('click', function(){
                     
-                    //console.log($(this).attr('id'));
-                    // let userText = $('<p>').text("hey how are you?");
-                    // let otherText = $('<p>').text("Hey. Im good thank you.")
-                    // messagesDiv.append(userText, otherText)
-                    dropDown.toggle();   
+                    dropDown.toggle();
+                    
+                    if (dropDown.is(':visible')) {
+                        messagesDiv.scrollTop(messagesDiv.prop('scrollHeight'));
+                    }
                 })
                 send.on('click', function(){
                     let text = $('<p>').text(input.val()).addClass("right-message");
-                    messagesDiv.prepend(text)
+                    messagesDiv.append(text)
                     axios.post(`messages/${match_id}`,{
                         user_id: overallId,
                          text: input.val()
@@ -364,6 +420,4 @@ async function createHomePage(){
 
 $(document).ready(function() {
     createLoginPage();
-    // $("body").removeClass("login").addClass("homepage")
-    // createHomePage()
 })
