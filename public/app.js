@@ -1,6 +1,6 @@
 
 let loginContainer = $('<container>').addClass('login');
-let overallId = 3;
+let overallId = 0;
 function createLoginPage(){
     
     let image = $('<img>').attr('src', 'pictures/front-image.jpg').attr('height', '500px').attr('width', '400px');
@@ -134,12 +134,13 @@ function createHeader(){
 function editBio(info, response){
     let editButton = $('<img>').addClass('edit').attr('src', 'pictures/editing.png')
                     const { f_name, l_name, bio, interest, personality, pic} = response.data[0];
-                    console.log(response);
+                    //console.log(response);
                     let image = $('<img>').attr('src', pic).addClass("infoPic");
                     let name = $('<h3>').text(f_name + ' ' + l_name).css("margin-bottom", "0");
                     let characteristics = $('<em>').text(personality);
                     let pbio= $('<p>').text(bio).css("margin-top","1em");
                     let interestedIn = $('<p>').text(`Interested in: ${interest}`).css("margin-bottom", "0");
+                    
                     info.append(editButton, image, name, characteristics, pbio, interestedIn);
 
                     editButton.on('click', function(){
@@ -162,7 +163,15 @@ function editBio(info, response){
                             option2.prop("selected","selected");
                         }
                         newInterest.append(option1,option2);
-                        info.append(saveButton,image, name2, form.append(traitsLabel,characteristics2,bioLabel, newBio,interestsLabel, newInterest))
+                        let deletebutton = $('<button>').text('Delete Account').addClass('btn delete');
+                        info.append(saveButton,image, name2, form.append(traitsLabel,characteristics2,bioLabel, newBio,interestsLabel, newInterest), deletebutton)
+
+                        deletebutton.on('click', function(){
+                            alert("button pressed")
+                            axios.delete(`/user/${overallId}`)
+                               // .then(response => console.log(response))
+                            createLoginPage();
+                        })
 
                         saveButton.on('click', function(){
                             axios.patch(`/user/${overallId}`,{
@@ -171,7 +180,7 @@ function editBio(info, response){
                                 interest: newInterest.val()
                             })
                                 .then(response => {
-                                    console.log("response")
+                                    //console.log("response")
                                     info.empty();
                                     editBio(info, response);
                                     createHomePage();
@@ -200,7 +209,11 @@ async function createLeftColumn(container){
 }
 
 function createProfile(response, div, count){
-    let profile = $('<div>').removeClass().addClass('profile magictime puffIn');
+    // div.addClass('puffIn')
+    let profile = $('<div>').addClass('profile');
+    // setTimeout(function(){
+    //     div.removeClass('magictime puffIn')
+    // }, 2000);
     if (count < 0){
         let noMatch = $('<img>').attr("src", "pictures/rizz-meter.jpg").addClass("rizzler-pic")
         let sorry = $('<h2>').text("Sorry, your rizz has ran out").addClass("matchless")
@@ -222,26 +235,41 @@ function createProfile(response, div, count){
     profile.append(left,picture, right, h2, infoDiv);
     div.append(profile);
     right.on('click', function(){
-        profile.addClass('magictime rotateRight');
-        div.empty();
+        //div.removeClass('puffIn')
+        div.addClass('openDownRightOut');
+        
         count--;
+        setTimeout(function(){
+            div.removeClass('openDownRightOut') 
+            div.empty();
+            createProfile(response, div,count)
+        }, 1000);
         axios.patch(`/swipe-right/${overallId}`, {
             profile_id : id,
         })
-        .then(response => console.log(response));
-        createProfile(response, div,count);
+        .then(res => {
+            //console.log(res)
+            
+        });
+        
+        
+        
+        
     })
+    
     left.on('click', function(){
-        profile.addClass('magictime rotateRight');
-        div.empty();
-        // picture.hover(function () {
-        //     $(this).
-        // });
+        div.addClass('openDownLeftOut');
+        count--;
+        setTimeout(function(){
+            div.removeClass('openDownLeftOut') 
+            div.empty();
+            createProfile(response, div,count)
+        }, 1000);
+        
         axios.patch(`/swipe-left/${overallId}`, {
             profile_id : id,
         })
-        count--;
-        createProfile(response, div,count);
+        
     })
 
     }
@@ -249,11 +277,11 @@ function createProfile(response, div, count){
 }
 
 async function createCenterColumn(){
-    let div2 = $('<div>').addClass('center');
+    let div2 = $('<div>').addClass('center magictime');
     
     await axios.get(`/profile/${overallId}`)
         .then(response => {
-            console.log(response)
+            //console.log(response)
             let count =response.data.length - 1;
             createProfile(response, div2, count)
             })
@@ -267,7 +295,7 @@ function createRightColumn(){
     div3.append(h3)
     axios.get(`/matches/${overallId}`)
         .then(response => {
-            console.log(response);
+            //console.log(response);
             let data = response.data
             for(let i = 0; i < data.length; i++){
                 let div= $('<div>').addClass("match").attr("id", `match${i}`)
@@ -310,7 +338,7 @@ function createRightColumn(){
                         user_id: overallId,
                          text: input.val()
                     })
-                        .then(response => console.log(response));
+                        //.then(response => console.log(response));
                     input.val('')
                     
                 })
@@ -335,7 +363,7 @@ async function createHomePage(){
 }
 
 $(document).ready(function() {
-    // createLoginPage();
-    $("body").removeClass("login").addClass("homepage")
-    createHomePage()
+    createLoginPage();
+    // $("body").removeClass("login").addClass("homepage")
+    // createHomePage()
 })

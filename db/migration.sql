@@ -1,6 +1,7 @@
 DROP TABLE IF EXISTS users CASCADE;
 DROP TABLE IF EXISTS info;
-DROP TABLE IF EXISTS matches;
+DROP TABLE IF EXISTS matches CASCADE;
+DROP TABLE IF EXISTS messages;
 
 CREATE TABLE users(
     id SERIAL PRIMARY KEY,
@@ -13,7 +14,7 @@ CREATE TABLE users(
 
 CREATE TABLE info(
     id SERIAL PRIMARY KEY,
-    user_id INT UNIQUE REFERENCES users(id),
+    user_id INT UNIQUE REFERENCES users(id) ON DELETE CASCADE,
     personality varchar(50),
     bio TEXT,
     gender varchar(10),
@@ -23,8 +24,8 @@ CREATE TABLE info(
 
 CREATE TABLE matches(
     id SERIAL PRIMARY KEY,
-    user1_id INT REFERENCES users(id),
-    user2_id INT REFERENCES users(id),
+    user1_id INT REFERENCES users(id) ON DELETE CASCADE,
+    user2_id INT REFERENCES users(id) ON DELETE CASCADE,
     user1_likes BOOLEAN,
     user2_likes BOOLEAN,
     match BOOLEAN
@@ -32,7 +33,7 @@ CREATE TABLE matches(
 
 CREATE TABLE messages(
     id SERIAL PRIMARY Key,
-    match_id int REFERENCES matches(id),
-    user_id int REFERENCES users(id),
+    match_id int REFERENCES matches(id) ON DELETE CASCADE,
+    user_id int REFERENCES users(id) ON DELETE CASCADE,
     message text
 );
