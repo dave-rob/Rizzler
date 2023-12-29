@@ -1,11 +1,12 @@
 import express from 'express';
 import pg from 'pg';
-import basicAuth from 'express-basic-auth';
+//import basicAuth from 'express-basic-auth';
 import 'dotenv/config'
 import multer from 'multer';
 const app = express();
 let imagefullname = ''
 
+//sets up storage for pictures and sets the image to jpg
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
       cb(null, 'public/profile_pics/')
@@ -17,7 +18,10 @@ const storage = multer.diskStorage({
     }
   })
   
-  const upload = multer({ storage: storage })
+//will store the pic in storage above
+const upload = multer({ storage: storage })
+
+//connectionString = database url for render
 const connectionString= process.env.DATABASE_URL;
 
 const db = new pg.Pool({
@@ -32,6 +36,7 @@ app.use(express.static('public'))
 app.use(express.urlencoded({ extended:true}));
 app.use(express.json());
 
+//will register the user
 app.post('/register', upload.single('image'), async (req, res)=>{
     try{
         let body = req.body;
@@ -41,17 +46,25 @@ app.post('/register', upload.single('image'), async (req, res)=>{
             }
         }
         const { f_name, l_name, username, email, password, gender } = body;
+
+        //creates user with salted password
         await db.query("INSERT INTO users (f_name, l_name, username, email, password) VALUES ($1, $2, $3, $4,crypt($5, gen_salt('bf')));",
         [f_name, l_name, username, email, password])
         const { rows } = await db.query("SELECT id from users WHERE username = $1;", [username]);
         let user_id= rows[0].id
         let path = `profile_pics/${imagefullname}`
+
+        //defaults interests that user can change later
         if(gender === 'male'){
             await db.query("INSERT INTO info (user_id, gender, interest, pic) VALUES ($1,'Men', 'Women', $2);", [user_id, path]);
         } else {
             await db.query("INSERT INTO info (user_id, gender, interest, pic) VALUES ($1,'Women', 'Men', $2);", [user_id, path]);
         }
+
+        //creates a chance of a match with every user
         await db.query('insert into matches(user1_id, user2_id) Select users.id, info.id from users join info on users.id!=info.user_id and users.id=$1 AND users.id IS NOT NULL;', [user_id]);
+        
+        //takes you to home, basically a refresh
         res.redirect('/');
     } catch (err){
         console.error(err)
@@ -60,6 +73,7 @@ app.post('/register', upload.single('image'), async (req, res)=>{
     
 })
 
+//gets users credentials and checks agains the username and password
 app.post('/login', async (req, res) => {
     try{
         const {username, password} = req.body;
@@ -76,14 +90,18 @@ app.post('/login', async (req, res) => {
     }
 })
 
+//gets info from info and users table to create info div
 app.get("/user/:id", async (req, res) => {
     const {id} = req.params;
     const {rows} = await db.query( 'SELECT users.f_name, users.l_name, info.personality, info.bio, info.gender, info.interest, info.pic FROM users JOIN info ON users.id = $1 AND users.id = info.user_id;', [id])
+    
+    //sets gender and interest globally
     global_interest = rows[0].interest;
     global_gender = rows[0].gender;
     res.send(rows);
 })
 
+//updates info in the info table
 app.patch("/user/:id", async (req, res) => {
     try{
         const {id} = req.params;
@@ -97,6 +115,7 @@ app.patch("/user/:id", async (req, res) => {
     
 })
 
+//deletes user from users table and everywhere due to cascade
 app.delete('/user/:id', async (req, res) => {
     try{
         const {id} = req.params;
@@ -107,23 +126,23 @@ app.delete('/user/:id', async (req, res) => {
     }
 })
 
+//gets profiles of all users they are interested in and if they like or not
 app.get("/profile/:id", async (req, res)=>{
     try{
         const {id} = req.params;
+
+        //gets users that are not them, and gender they like and if the other person likes their gender as well
         const {rows} = await db.query( 'SELECT users.id, users.f_name, users.l_name, info.personality, info.bio, info.pic FROM users JOIN info ON users.id != $1 AND users.id = info.user_id AND info.interest = $2 AND info.gender = $3;', [id, global_gender, global_interest])
-        let profiles = []
-        
-            for (let i = rows.length-1; i>=0; i--){
-               
-            let user = await db.query("SELECT user1_id,user2_id, user1_likes, user2_likes FROM matches WHERE (user1_id = $1 or user2_id = $1) AND (user1_id = $2 OR user2_id = $2);",[id, rows[i].id])
-            
-            if(user.rows[0].user1_id == id && user.rows[0].user1_likes != null){
+    
+            for (let i = rows.length-1; i>=0; i--){  
+                let user = await db.query("SELECT user1_id,user2_id, user1_likes, user2_likes FROM matches WHERE (user1_id = $1 or user2_id = $1) AND (user1_id = $2 OR user2_id = $2);",[id, rows[i].id])
                 
-                rows.splice(i, 1)
-            } if(user.rows[0].user2_id == id && user.rows[0].user2_likes != null){
-                
-                rows.splice(i,1)
-            }
+                //only want profiles where the user has not said if they like or not
+                if(user.rows[0].user1_id == id && user.rows[0].user1_likes != null){   
+                    rows.splice(i, 1)
+                } if(user.rows[0].user2_id == id && user.rows[0].user2_likes != null){
+                    rows.splice(i,1)
+                }
             
             
             }
@@ -135,18 +154,17 @@ app.get("/profile/:id", async (req, res)=>{
     }
 })
 
+//gets the matches of the user
 app.get("/matches/:id", async (req, res) =>{
     try{
         const {id} = req.params;
         const {rows} = await db.query("select id,user1_id, user2_id FROM matches WHERE match='t' AND (user1_id = $1 OR user2_id=$1);", [id]);
         let matches = [];
         for(let i =0; i<rows.length; i++){
-            //et match_id = rows[i].id
             if(rows[i].user1_id == id){
                 let user2 = await db.query("SELECT users.id, f_name, l_name, pic FROM users JOIN info ON users.id = $1 AND users.id = user_id;", [rows[i].user2_id])
                 user2.rows[0].match_id = rows[i].id
                 matches.unshift(user2.rows[0]);
-
             } else{
                 let user1 = await db.query("SELECT users.id, f_name, l_name, pic FROM users JOIN info ON users.id = $1 AND users.id = user_id;",[rows[i].user1_id])
                 user1.rows[0].match_id = rows[i].id
@@ -160,11 +178,12 @@ app.get("/matches/:id", async (req, res) =>{
     }
 })
 
+//updates that the user likes the other
 app.patch("/swipe-right/:id", async (req, res) => {
     try{
         const{id} = req.params;
         const {profile_id}= req.body;
-        const {rows} = await db.query("select user1_id, user2_id, user1_likes, user2_likes FROM matches WHERE (user1_id = $1 OR user2_id=$1) AND (user1_id = $2 OR user2_id = $2);", [id, profile_id]);
+        const {rows} = await db.query("select id,user1_id, user2_id, user1_likes, user2_likes FROM matches WHERE (user1_id = $1 OR user2_id=$1) AND (user1_id = $2 OR user2_id = $2);", [id, profile_id]);
         if(rows[0].user1_id ===profile_id && rows[0].user1_likes === true){
             await db.query("UPDATE matches SET user2_likes = true, match = true WHERE user1_id = $1 and user2_id = $2;",[profile_id, id])
         }else if (rows[0].user1_id ===profile_id) {
@@ -175,13 +194,13 @@ app.patch("/swipe-right/:id", async (req, res) => {
         else {
             await db.query("UPDATE matches SET user1_likes = true WHERE user2_id = $1 and user1_id = $2;",[profile_id, id])
         }
-        
-        res.send("yay")
+        res.send(rows[0])
     } catch(err){
         console.log(err);
     }
 })
 
+//updates that the user doesn't like the other
 app.patch("/swipe-left/:id", async (req, res) => {
     try{
         const {id} = req.params;
@@ -192,13 +211,13 @@ app.patch("/swipe-left/:id", async (req, res) => {
         }else {
             await db.query("UPDATE matches SET user1_likes = false, match = false WHERE user2_id = $1 and user1_id = $2;",[profile_id, id])
         }
-        
-        res.send("yay")
+        res.send("successful")
     } catch(err){
         console.log(err);
     }
 })
 
+//gets the messages between two users based on their match id
 app.get('/messages/:match_id', async (req,res)=>{
     try {
        const {match_id } = req.params;
@@ -210,6 +229,7 @@ app.get('/messages/:match_id', async (req,res)=>{
     
 })
 
+//adds messages to the messages database
 app.post('/messages/:match_id', async (req,res)=>{
     try{
         const {match_id} = req.params;

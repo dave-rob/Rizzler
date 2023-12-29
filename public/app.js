@@ -1,6 +1,8 @@
-
 let loginContainer = $('<container>').addClass('login');
 let overallId = 0;
+let div3 = $('<div>').addClass('right').attr('id', 'matches');
+
+//array of pickup lines for the generator
 const pickupLines = ["Math is so confusing. It's always talking about x and y and never you and I.",
 "Are you a vape? Because I'd never use you.",
 "Are you the school stairs? Because you take my breath away.",
@@ -41,13 +43,16 @@ const pickupLines = ["Math is so confusing. It's always talking about x and y an
 "Do you like soccer? My favorite player is Ronaldo, but we can still get Messi.",
 "Are you French? Because Eiffel for you?"]
 
+//function to return a random pickup line
 function randomPickupLine(){
     let randomNumber = Math.floor(Math.random()*pickupLines.length)
     return pickupLines[randomNumber];
 }
 
+//creates the login page
 function createLoginPage(){
     
+    //all the elements for the login page
     let image = $('<img>').attr('src', 'pictures/front-image.jpg').attr('height', '500px').attr('width', '400px');
     let loginDiv = $('<div>').addClass('login');
     let heading1 = $('<h1>').html('<strong>Find the one.</strong>');
@@ -64,19 +69,22 @@ function createLoginPage(){
     let slogan = $('<p>').addClass('slogan').text("Get your rizz on with some class.");
     let copyright = $('<p>').addClass('copy').html('© Rizzler 2024');
     
+    //append all the elements to the page
     form.append(labelUsername, inputUsername, labelPassword, inputPassword, btnDiv.append(loginBtn, registerBtn));
     loginDiv.append(heading1, heading6, form, message,slogan, copyright);
     loginContainer.append(image, loginDiv);
-
     $('body').append(loginContainer);
 
+    //once login is clicked the username and password will be sent to the server to verify credentials
     loginBtn.on('click', function(){
 
+        //body with credentials
         const requestBody = {
             username:inputUsername.val(),
             password:inputPassword.val()
         }
 
+        //post method to send credentials and verify, if correct will go to the home page, if not will print incorrect username/password
         axios.post('/login', requestBody)
             .then(response => {
                     const {id} = response.data;
@@ -85,26 +93,29 @@ function createLoginPage(){
                     $("body").removeClass("login").addClass("homepage")
                     loginContainer.empty();
                     createHomePage();
-
                 })
             .catch(error => {
                 message.text('Incorrect Username/Password')
-                slogan.css("margin-top", "3.6em");
-                
+                slogan.css("margin-top", "3.6em");   
              });
     })
 
-    
+    //button to take you to register an account
     registerBtn.on('click', function(){
         loginContainer.empty();
         createRegisterPage();
     })
 }
 
+//create the page for a user to register an account
 function createRegisterPage(){
+
+    //all the elements for the page
     let loginDiv = $('<div>').addClass('register');
     let heading1 = $('<h1>').html('<strong>Lets get started!</strong>');
     let heading6 = $('<h6>').text('Lets create an account.');
+
+    //form is posted and submitted to the server once Register is clicked
     let form = $('<form>').addClass('register').attr("method", "post").attr({"action": '/register', "enctype": "multipart/form-data"});
     let uploaddiv = $('<div>').addClass("upload");
     let fileInput = $('<input>').attr({
@@ -118,6 +129,8 @@ function createRegisterPage(){
         'style': 'cursor: pointer;'
     }).text('Upload Image');
     let image = $('<img>').attr('id', 'picture');
+
+    //changes picture after uploaded
     fileInput.on('change', function(event) {
         let reader = new FileReader();
         reader.onload = function() {
@@ -136,7 +149,7 @@ function createRegisterPage(){
     let labelUsername = $('<label>').text('Username:');
     let inputUsername = $('<input>').attr('name', 'username');
     let labelEmail = $('<label>').text('Email:');
-    let inputEmail = $('<input>').attr('name', 'email');
+    let inputEmail = $('<input>').attr('name', 'email').attr('type', 'email');
     let labelPassword = $('<label>').text('Password:');
     let inputPassword = $('<input>').attr('name', 'password').attr('type', 'password');
     let genderDiv = $('<div>').addClass('gender');
@@ -156,6 +169,8 @@ function createRegisterPage(){
     });
     var femaleLabel = $('<label>').addClass('form-check-label').attr('for', 'female').text('Female');
     let registerBtn = $('<button>').addClass('btn btn-light register').text('Register');
+
+    //append all elements to the login container
     genderDiv.append(maleRadio.append(maleInput, maleLabel),femaleRadio.append(femaleInput, femaleLabel));
     nameDiv.append(labelFirstname, labelLastname);
     inputDiv.append(inputFirstname, inputLastname);
@@ -165,179 +180,183 @@ function createRegisterPage(){
 
 }
 
+//creates the header of the homepage once logged in
 function createHeader(){
     let nav = $('<nav>').addClass('navbar header');
     let navdiv = $('<div>').addClass('container-fluid');
     let brandLink = $('<a>').addClass('navbar-brand header').text('Rizzler').attr('href', '/').css('margin-left', '20px');
-    
-
     navdiv.append(brandLink);
     nav.append(navdiv);
-    
     $('body').prepend(nav);
 }
 
+//creates bio in left column and allows you to edit info.
 function editBio(info, response){
+
+    //create the elements for the info div
     let editButton = $('<img>').addClass('edit').attr('src', 'pictures/editing.png')
-                    const { f_name, l_name, bio, interest, personality, pic} = response.data[0];
-                    //console.log(response);
-                    let image = $('<img>').attr('src', pic).addClass("infoPic");
-                    let name = $('<h3>').text(f_name + ' ' + l_name).css("margin-bottom", "0");
-                    let characteristics = $('<em>').text(personality);
-                    let pbio= $('<p>').text(bio).css("margin-top","1em");
-                    let interestedIn = $('<p>').text(`Interested in: ${interest}`).css("margin-bottom", "0");
-                    
-                    info.append(editButton, image, name, characteristics, pbio, interestedIn);
+    const { f_name, l_name, bio, interest, personality, pic} = response.data[0];
+    let image = $('<img>').attr('src', pic).addClass("infoPic");
+    let name = $('<h3>').text(f_name + ' ' + l_name).css("margin-bottom", "0");
+    let characteristics = $('<em>').text(personality);
+    let pbio= $('<p>').text(bio).css("margin-top","1em");
+    let interestedIn = $('<p>').text(`Interested in: ${interest}`).css("margin-bottom", "0");
+    
+    info.append(editButton, image, name, characteristics, pbio, interestedIn);
 
-                    editButton.on('click', function(){
-                        info.empty();
-                        let saveButton = $('<img>').addClass('edit').attr('src', 'pictures/diskette.png')
-                        let image = $('<img>').attr('src', pic).addClass("infoPic");
-                        let name2 = $('<h3>').text(f_name + ' ' + l_name);
-                        let form = $('<form>').addClass("info-form");
-                        let traitsLabel = $('<label>').text("Personality Traits:");
-                        let characteristics2 = $('<input>').attr("name", "personality").attr("value", personality);
-                        let bioLabel = $('<label>').text("Bio:");
-                        let newBio = $('<textarea>').attr({"name":"bio", "rows":"3"}).text(bio);
-                        let interestsLabel = $('<label>').text("Interested in:");
-                        let newInterest = $('<select>').attr("name", "gender");
-                        let option1 = $('<option>').attr("value", "Men").text("Men");
-                        let option2 = $('<option>').attr("value", "Women").text("Women");
-                        if(interest==='Men'){
-                                option1.prop("selected", "selected");
-                        } else{
-                            option2.prop("selected","selected");
-                        }
-                        newInterest.append(option1,option2);
-                        let deletebutton = $('<button>').text('Delete Account').addClass('btn delete');
-                        info.append(saveButton,image, name2, form.append(traitsLabel,characteristics2,bioLabel, newBio,interestsLabel, newInterest), deletebutton)
+    //once clicked, user is able to edit their info or delete their account
+    editButton.on('click', function(){
+        info.empty();
+        let saveButton = $('<img>').addClass('edit').attr('src', 'pictures/diskette.png')
+        let image = $('<img>').attr('src', pic).addClass("infoPic");
+        let name2 = $('<h3>').text(f_name + ' ' + l_name);
+        let form = $('<form>').addClass("info-form");
+        let traitsLabel = $('<label>').text("Personality Traits:");
+        let characteristics2 = $('<input>').attr("name", "personality").attr("value", personality);
+        let bioLabel = $('<label>').text("Bio:");
+        let newBio = $('<textarea>').attr({"name":"bio", "rows":"3"}).text(bio);
+        let interestsLabel = $('<label>').text("Interested in:");
+        let newInterest = $('<select>').attr("name", "gender");
+        let option1 = $('<option>').attr("value", "Men").text("Men");
+        let option2 = $('<option>').attr("value", "Women").text("Women");
+        if(interest==='Men'){
+                option1.prop("selected", "selected");
+        } else{
+            option2.prop("selected","selected");
+        }
+        newInterest.append(option1,option2);
+        let deletebutton = $('<button>').text('Delete Account').addClass('btn delete');
+        info.append(saveButton,image, name2, form.append(traitsLabel,characteristics2,bioLabel, newBio,interestsLabel, newInterest), deletebutton)
 
-                        deletebutton.on('click', function(){
-                            axios.delete(`/user/${overallId}`)
-                                .then(response => {
-                                    console.log(response)
-                                    $('body').empty();
-                                    $('body').removeClass().addClass('login')
-                                    createLoginPage();
-                                })
-                        })
+        //Will delete user and load up the login screen
+        deletebutton.on('click', function(){
+            axios.delete(`/user/${overallId}`)
+                .then(response => {
+                    console.log(response)
+                    $('body').empty();
+                    $('body').removeClass().addClass('login')
+                    createLoginPage();
+                })
+        })
 
-                        saveButton.on('click', function(){
-                            axios.patch(`/user/${overallId}`,{
-                                "personality": characteristics2.val(),
-                                bio: newBio.val(),
-                                interest: newInterest.val()
-                            })
-                                .then(response => {
-                                    //console.log("response")
-                                    info.empty();
-                                    editBio(info, response);
-                                    createHomePage();
-                                    })
-                            // info.empty()
-                            // editBio(info, response);
-                        })
+        //will save all changes and show their new info
+        saveButton.on('click', function(){
+            axios.patch(`/user/${overallId}`,{
+                "personality": characteristics2.val(),
+                bio: newBio.val(),
+                interest: newInterest.val()
+            })
+                .then(response => {
+                    info.empty();
+                    editBio(info, response);
+                    createHomePage();
                     })
+        })
+    })
 }
 
-async function createLeftColumn(container){
+//creates teh left column with the info and pickup line generator
+async function createLeftColumn(){
     let div1 = $('<div>').addClass('left');
     let info = $('<div>').addClass('info');
     let pickUpLineGenerator = $('<div>').addClass('generator');
     let title = $('<h4>').text("Need help with your rizz?");
     let button = $('<button>').text("Generate a pickup line").addClass('btn delete');
     let line = $('<p>').text(' ').addClass('line');
+
+    //when clicked a new pickup line will generate
     button.on('click', function(){
         line.text(randomPickupLine())
     })
+
     div1.append(info, pickUpLineGenerator.append(title, button, line));
+
+    //gets the users info for the info div
     await axios.get(`/user/${overallId}`)
             .then((response) => {
-                    editBio(info, response)
-                    
+                    editBio(info, response) 
                 })
-            .catch(error => {
-                message.text('Incorrect Username/Password')
-                slogan.css("margin-top", "3.6em");
-                
-             });
+            
     return div1
 }
 
+//Loads up the different profiles for the user to swipe through
 function createProfile(response, div, count){
-    // div.addClass('puffIn')
+    
     let profile = $('<div>').addClass('profile');
-    // setTimeout(function(){
-    //     div.removeClass('magictime puffIn')
-    // }, 2000);
+    
+    //if no profiles left, display
     if (count < 0){
         let noMatch = $('<img>').attr("src", "pictures/rizz-meter.jpg").addClass("rizzler-pic")
         let sorry = $('<h2>').text("Sorry, your rizz has ran out").addClass("matchless")
         div.append(profile.append(noMatch, sorry))
-    } else {
+    } else { //show for the different profiles
         const { id, bio, f_name, l_name, personality, pic } = response.data[count]
-    
         let left= $('<img>').attr("src", "pictures/left.png").addClass("left-swipe")
-    let picture = $('<img>').attr("src", pic).addClass("rizzler-pic");
-    
-    let right = $('<img>').attr("src", "pictures/right.png").addClass("right-swipe")
-    let infoDiv = $('<div>').addClass("profile-info");
-
-    let h2 = $('<h2>').text(f_name + " " + l_name);
-    let hr = $('<hr>')
-    let persona = $('<em>').text(personality)
-    let bioP =$('<p>').text(bio)
-    infoDiv.append(hr, persona, bioP);
-    profile.append(left,picture, right, h2, infoDiv);
-    div.append(profile);
-    right.on('click', function(){
-        //div.removeClass('puffIn')
-        div.addClass('openDownRightOut');
-        
-        count--;
-        setTimeout(function(){
-            div.removeClass('openDownRightOut') 
-            div.empty();
-            createProfile(response, div,count)
-        }, 1000);
-        axios.patch(`/swipe-right/${overallId}`, {
-            profile_id : id,
-        })
-        .then(res => {
-            //console.log(res)
+        let picture = $('<img>').attr("src", pic).addClass("rizzler-pic");
+        let right = $('<img>').attr("src", "pictures/right.png").addClass("right-swipe")
+        let infoDiv = $('<div>').addClass("profile-info");
+        let h2 = $('<h2>').text(f_name + " " + l_name);
+        let hr = $('<hr>')
+        let persona = $('<em>').text(personality)
+        let bioP =$('<p>').text(bio)
+        infoDiv.append(hr, persona, bioP);
+        profile.append(left,picture, right, h2, infoDiv);
+        div.append(profile);
+        right.on('click', async function(){
             
-        });
-        
-        
-        
-        
-    })
-    
-    left.on('click', function(){
-        div.addClass('openDownLeftOut');
-        count--;
-        setTimeout(function(){
-            div.removeClass('openDownLeftOut') 
-            div.empty();
-            createProfile(response, div,count)
-        }, 1000);
-        
-        axios.patch(`/swipe-left/${overallId}`, {
-            profile_id : id,
+            //adds animation
+            div.addClass('openDownRightOut');
+            count--;
+
+            //removes animation and creates next profile, letting animation finish
+            setTimeout(function(){
+                div.removeClass('openDownRightOut') 
+                div.empty();
+                createProfile(response, div,count)
+            }, 1000);
+
+            //updates the user saying yes
+            await axios.patch(`/swipe-right/${overallId}`, {
+                profile_id : id,
+            })
+            .then(res => {
+                console.log(res);
+                div3.empty();
+                createRightColumn();
+            });
         })
         
-    })
+        left.on('click', function(){
+
+            //adds animation
+            div.addClass('openDownLeftOut');
+            count--;
+
+            //removes animation and creates next profile, letting animation finish
+            setTimeout(function(){
+                div.removeClass('openDownLeftOut') 
+                div.empty();
+                createProfile(response, div,count)
+            }, 1000);
+            
+            //updates the user saying no
+            axios.patch(`/swipe-left/${overallId}`, {
+                profile_id : id,
+            })  
+        })
 
     }
     
 }
 
+//creates the center div for the profile and gets all the profiles users haven't swiped on yet
 async function createCenterColumn(){
     let div2 = $('<div>').addClass('center magictime');
     
+    //gets all the profiles users haven't swiped on yet
     await axios.get(`/profile/${overallId}`)
         .then(response => {
-            //console.log(response)
             let count =response.data.length - 1;
             createProfile(response, div2, count)
             })
@@ -345,13 +364,15 @@ async function createCenterColumn(){
     return div2;
 }
 
+//creates the right column for the messages to be populated
 function createRightColumn(){
-    let div3 = $('<div>').addClass('right');
+    
     let h3 = $('<h3>').text("Matches").addClass("messages-header");
     div3.append(h3)
+
+    //gets all the matches for the user and adds them to the right
     axios.get(`/matches/${overallId}`)
         .then(response => {
-            //console.log(response);
             let data = response.data
             for(let i = 0; i < data.length; i++){
                 let div= $('<div>').addClass("match").attr("id", `match${i}`)
@@ -365,36 +386,43 @@ function createRightColumn(){
                 let dropDown = $('<div>').hide();
                 div3.append(div.append(img, name), dropDown.append(messagesDiv, textDiv))
                 let match_id=data[i].match_id;
+
+                //adds all the previous messages to the messageDiv
                 axios.get(`/messages/${match_id}`)
-                        .then(response => {
-                            for(let i = 0; i < response.data.length; i++){
-                                if(response.data[i].user_id == overallId){
-                                    let text = $('<p>').text(response.data[i].message).addClass("right-message");
-                                    messagesDiv.append(text);
-                                } else {
-                                    let text = $('<p>').text(response.data[i].message).addClass("left-message");
-                                    messagesDiv.append(text);
-                                }
-                                
-                                
-                            };   
-                        })
+                    .then(response => {
+                        for(let i = 0; i < response.data.length; i++){
+                            if(response.data[i].user_id == overallId){
+                                let text = $('<p>').text(response.data[i].message).addClass("right-message");
+                                messagesDiv.append(text);
+                            } else {
+                                let text = $('<p>').text(response.data[i].message).addClass("left-message");
+                                messagesDiv.append(text);
+                            }
+                        };   
+                    })
+
+                //drops down div where you can send messages and see messages
                 div.on('click', function(){
-                    
                     dropDown.toggle();
-                    
+
+                    //if the div is dropdown and messagesDiv is overflowed it will take you to the bottom
                     if (dropDown.is(':visible')) {
                         messagesDiv.scrollTop(messagesDiv.prop('scrollHeight'));
                     }
                 })
+
+                //sends message
                 send.on('click', function(){
                     let text = $('<p>').text(input.val()).addClass("right-message");
                     messagesDiv.append(text)
+
+                    //post message from user for match id to database
                     axios.post(`messages/${match_id}`,{
                         user_id: overallId,
                          text: input.val()
                     })
-                        //.then(response => console.log(response));
+                       
+                    //empties the input box
                     input.val('')
                     
                 })
@@ -402,22 +430,21 @@ function createRightColumn(){
 
         })
     
-    
-    
-    return div3;
 }
 
+//creates the complete homepage with the header and all divs
 async function createHomePage(){
     $('body').empty();
     createHeader();
     let container = $('<container>').addClass('home')
-    let div1 = await createLeftColumn(container);
+    let div1 = await createLeftColumn();
     let div2 = await createCenterColumn();
-    let div3 = createRightColumn();
+    createRightColumn();
     container.append(div1, div2,div3)
     $('body').append(container)
 }
 
+//loads loginPage configuration when page is loaded
 $(document).ready(function() {
     createLoginPage();
 })
