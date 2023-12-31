@@ -249,6 +249,7 @@ function editBio(info, response){
             })
                 .then(response => {
                     info.empty();
+                    div3.empty();
                     editBio(info, response);
                     createHomePage();
                     })
