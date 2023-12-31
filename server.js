@@ -68,7 +68,7 @@ app.post('/register', upload.single('image'), async (req, res)=>{
         res.redirect('/');
     } catch (err){
         console.error(err)
-        res.status(500).send("Internal Server Error");
+        res.status(500).send("Make sure everything is filled out, if so username is taken. Just hit the back button to go to the register page");
     }
     
 })

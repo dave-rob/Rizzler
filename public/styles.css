@@ -292,6 +292,7 @@ background: #44444C;
     position: relative;
     overflow-y: scroll;
     padding-top: 0.5em;
+    text-align: left;
 }
 
 .messagebox{

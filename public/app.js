@@ -112,8 +112,10 @@ function createRegisterPage(){
 
     //all the elements for the page
     let loginDiv = $('<div>').addClass('register');
+    loginContainer.css("margin-top", "0")
     let heading1 = $('<h1>').html('<strong>Lets get started!</strong>');
     let heading6 = $('<h6>').text('Lets create an account.');
+
 
     //form is posted and submitted to the server once Register is clicked
     let form = $('<form>').addClass('register').attr("method", "post").attr({"action": '/register', "enctype": "multipart/form-data"});
@@ -123,7 +125,7 @@ function createRegisterPage(){
         'accept': 'image/*',
         'name': 'image',
         'id': 'file',
-    });
+    }).attr("required", "true");
     let label = $('<label>').attr({
         'for': 'file',
         'style': 'cursor: pointer;'
@@ -143,30 +145,29 @@ function createRegisterPage(){
     let nameDiv = $('<div>').addClass('names');
     let inputDiv = $('<div>').addClass('inputs');
     let labelFirstname = $('<label>').text('First Name:');
-    let inputFirstname = $('<input>').attr('name', 'f_name');
+    let inputFirstname = $('<input>').attr('name', 'f_name').attr("required", "true");
     let labelLastname = $('<label>').text('Last Name:').addClass("lastName");
-    let inputLastname = $('<input>').attr('name', 'l_name');
+    let inputLastname = $('<input>').attr('name', 'l_name').attr("required", "true");
     let labelUsername = $('<label>').text('Username:');
-    let inputUsername = $('<input>').attr('name', 'username');
+    let inputUsername = $('<input>').attr('name', 'username').attr("required", "true");
     let labelEmail = $('<label>').text('Email:');
-    let inputEmail = $('<input>').attr('name', 'email').attr('type', 'email');
+    let inputEmail = $('<input>').attr('name', 'email').attr('type', 'email').attr("required", "true");
     let labelPassword = $('<label>').text('Password:');
-    let inputPassword = $('<input>').attr('name', 'password').attr('type', 'password');
+    let inputPassword = $('<input>').attr('name', 'password').attr('type', 'password').attr("required", "true");
     let genderDiv = $('<div>').addClass('gender');
     var maleRadio = $('<div>').addClass('form-check');
     var maleInput = $('<input>').addClass('form-check-input').attr({
         'type': 'radio',
         'name': 'gender',
         'value': 'male'
-
-    });
+    }).attr("required", "true");
     var maleLabel = $('<label>').addClass('form-check-label').attr('for', 'male').text('Male');
-    var femaleRadio = $('<div>').addClass('form-check');
+    var femaleRadio = $('<div>').addClass('form-check').attr("required", "true");
     var femaleInput = $('<input>').addClass('form-check-input').attr({
         'type': 'radio',
         'name': 'gender',
         'value': 'female'
-    });
+    }).attr("required", "true");
     var femaleLabel = $('<label>').addClass('form-check-label').attr('for', 'female').text('Female');
     let registerBtn = $('<button>').addClass('btn btn-light register').text('Register');
 
