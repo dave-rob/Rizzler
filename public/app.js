@@ -226,16 +226,41 @@ function editBio(info, response){
             option2.prop("selected","selected");
         }
         newInterest.append(option1,option2);
-        let deletebutton = $('<button>').text('Delete Account').addClass('btn delete');
+
+        //create modal for delete button
+        var modal = $('<div>').addClass('modal fade').attr({
+            'id': 'modal',
+            'tabindex': '-1',
+            'role': 'dialog',
+            'aria-labelledby': 'exampleModalCenterTitle',
+            'aria-hidden': 'true'
+          });
+          var modalDialog = $('<div>').addClass('modal-dialog modal-dialog-centered').attr('role', 'document');
+          var modalContent = $('<div>').addClass('modal-content');
+          var modalHeader = $('<div>').addClass('modal-header');
+          var modalTitle = $('<h5>').addClass('modal-title').attr('id', 'modalTitle').text('Delete Account');
+          modalHeader.append(modalTitle);
+          var modalBody = $('<div>').addClass('modal-body').text('Are you sure you want to delete your account?');
+          var modalFooter = $('<div>').addClass('modal-footer');
+          var closeButtonFooter = $('<button>').addClass('btn btn-secondary').attr('data-dismiss', 'modal').text('Close');
+          var modalDeleteButton = $('<button>').addClass('btn btn-dark').text('Delete Account');
+          modalHeader.append(modalTitle);
+          modalFooter.append(closeButtonFooter, modalDeleteButton);
+          modalContent.append(modalHeader, modalBody, modalFooter);
+          modalDialog.append(modalContent);
+          modal.append(modalDialog);
+          $('body').append(modal);
+        let deletebutton = $('<button>').text('Delete Account').addClass('btn delete').attr({'data-toggle': "modal", 'data-target': '#modal'});
         info.append(saveButton,image, name2, form.append(traitsLabel,characteristics2,bioLabel, newBio,interestsLabel, newInterest), deletebutton)
 
         //Will delete user and load up the login screen
-        deletebutton.on('click', function(){
+        modalDeleteButton.on('click', function(){
             axios.delete(`/user/${overallId}`)
                 .then(response => {
-                    console.log(response)
+                    //console.log(response)
                     $('body').empty();
-                    $('body').removeClass().addClass('login')
+                    $('body').removeClass().addClass('login');
+                    div3.empty();
                     createLoginPage();
                 })
         })
