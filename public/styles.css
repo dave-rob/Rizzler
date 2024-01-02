@@ -219,8 +219,8 @@ div.profile{
     text-align: center;
     background-color: #808080;
     border-radius: 10px;
-    border:5px solid #44444C
-
+    border:5px solid #44444C;
+    height:100%;
 }
 .left-swipe, .right-swipe{
     width: 5%;
@@ -305,9 +305,12 @@ textarea.message{
     flex: 2;
 }
 
-button.message{
-    height:100%;
+img.message{
+    height:5%;
+    width: 8%;
+    padding: 0.75em;
     justify-self: flex-end;
+    background-color: #44444C;
 }
 
 .left-message{
@@ -328,6 +331,11 @@ button.message{
     margin-left: 2.5em;
 }
 
+.footer{
+    background-image: url('pictures/login-background.jpg');
+    color: #808080;
+    text-align: center;
+}
 
 /* ---------------------------MAGIC ANIMATIONS CSS------------------------- */
 .magictime {

@@ -382,7 +382,7 @@ function createRightColumn(){
                 let name = $('<h6>').text(data[i].f_name + " " + data[i].l_name);
                 let textDiv = $('<div>').addClass("messagebox")
                 let input = $('<textarea>').attr({"name":"messages", "rows":"1"}).addClass("message");
-                let send = $('<button>').text('send').addClass("message")
+                let send = $('<img>').addClass("message").attr('src', 'pictures/send.png')
                 textDiv.append(input,send)
                 let messagesDiv = $('<div>').addClass('messages-div').attr('id', `messages${i}`);
                 let dropDown = $('<div>').hide();
@@ -434,6 +434,12 @@ function createRightColumn(){
     
 }
 
+//creates the footer of the homepage once logged in
+function createFooter(){
+    let footer = $('<footer>').addClass('footer').text('© Rizzler 2024');
+    $('body').append(footer);
+}
+
 //creates the complete homepage with the header and all divs
 async function createHomePage(){
     $('body').empty();
@@ -444,6 +450,7 @@ async function createHomePage(){
     createRightColumn();
     container.append(div1, div2,div3)
     $('body').append(container)
+    createFooter();
 }
 
 //loads loginPage configuration when page is loaded
