@@ -1,6 +1,5 @@
 import express from 'express';
 import pg from 'pg';
-//import basicAuth from 'express-basic-auth';
 import 'dotenv/config'
 import multer from 'multer';
 const app = express();
