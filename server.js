@@ -61,7 +61,7 @@ app.post('/register', upload.single('image'), async (req, res)=>{
         }
 
         //creates a chance of a match with every user
-        await db.query('insert into matches(user1_id, user2_id) Select users.id, info.id from users join info on users.id!=info.user_id and users.id=$1 AND users.id IS NOT NULL;', [user_id]);
+        await db.query('insert into matches(user1_id, user2_id) Select users.id, info.user_id from users join info on users.id!=info.user_id and users.id=$1 AND users.id IS NOT NULL;', [user_id]);
         
         //takes you to home, basically a refresh
         res.redirect('/');
